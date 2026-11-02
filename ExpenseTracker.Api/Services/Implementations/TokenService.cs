@@ -9,26 +9,12 @@ namespace ExpenseTracker.Api.Services.Implementations;
 
 public class TokenService : ITokenService
 {
-    private readonly IConfiguration _configuration;
-
-    public TokenService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     public (string Token, DateTime ExpiresAtUtc) GenerateToken(ApplicationUser user)
     {
-        var secretKey = Environment.GetEnvironmentVariable("JWT_KEY")
-            ?? _configuration["Jwt:Key"]
-            ?? "ExpenseTrackerSuperSecretSecureKeyForJwtToken2026!";
-        var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
-            ?? _configuration["Jwt:Issuer"]
-            ?? "ExpenseTrackerApi";
-        var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
-            ?? _configuration["Jwt:Audience"]
-            ?? "ExpenseTrackerClient";
-        var durationMinutesStr = Environment.GetEnvironmentVariable("JWT_DURATION_MINUTES")
-            ?? _configuration["Jwt:DurationInMinutes"];
+        var secretKey = Environment.GetEnvironmentVariable("JWT_KEY")!;
+        var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!;
+        var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!;
+        var durationMinutesStr = Environment.GetEnvironmentVariable("JWT_DURATION_MINUTES");
         var durationMinutes = int.TryParse(durationMinutesStr, out var minutes) ? minutes : 1440; // 24 hours
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -64,4 +50,3 @@ public class TokenService : ITokenService
         return (tokenHandler.WriteToken(token), expiresAtUtc);
     }
 }
-
