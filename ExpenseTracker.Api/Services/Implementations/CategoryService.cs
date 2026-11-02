@@ -13,15 +13,36 @@ public class CategoryService(
     IMapper mapper
 ) : ICategoryService
 {
-    public async Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetCategoriesByWalletIdAsync(Guid walletId, string userId)
+    public async Task<ServiceResult<CategoryResponseDto>> CreateCategoryAsync(string userId, CreateCategoryDto request)
     {
-        var walletExists = await walletRepository.ExistsAsync(walletId, userId);
+        var walletExists = await walletRepository.ExistsAsync(request.WalletId, userId);
         if (!walletExists)
         {
-            return ServiceResult<IReadOnlyList<CategoryResponseDto>>.NotFound("Wallet not found.");
+            return ServiceResult<CategoryResponseDto>.NotFound("Wallet not found.");
         }
 
-        var categories = await categoryRepository.GetCategoriesByWalletIdAsync(walletId);
+        var category = mapper.Map<Category>(request);
+        category.Id = Guid.NewGuid();
+        category.CreatedAtUtc = DateTime.UtcNow;
+
+        await categoryRepository.AddAsync(category);
+
+        var response = mapper.Map<CategoryResponseDto>(category);
+        return ServiceResult<CategoryResponseDto>.Success(response, "Category created successfully.", statusCode: 201);
+    }
+
+    public async Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetCategoriesAsync(string userId, Guid? walletId = null)
+    {
+        if (walletId.HasValue)
+        {
+            var walletExists = await walletRepository.ExistsAsync(walletId.Value, userId);
+            if (!walletExists)
+            {
+                return ServiceResult<IReadOnlyList<CategoryResponseDto>>.NotFound("Wallet not found.");
+            }
+        }
+
+        var categories = await categoryRepository.GetCategoriesAsync(userId, walletId);
         var response = mapper.Map<IReadOnlyList<CategoryResponseDto>>(categories);
         return ServiceResult<IReadOnlyList<CategoryResponseDto>>.Success(response);
     }
@@ -36,25 +57,6 @@ public class CategoryService(
 
         var response = mapper.Map<CategoryResponseDto>(category);
         return ServiceResult<CategoryResponseDto>.Success(response);
-    }
-
-    public async Task<ServiceResult<CategoryResponseDto>> CreateCategoryAsync(Guid walletId, string userId, CreateCategoryDto request)
-    {
-        var walletExists = await walletRepository.ExistsAsync(walletId, userId);
-        if (!walletExists)
-        {
-            return ServiceResult<CategoryResponseDto>.NotFound("Wallet not found.");
-        }
-
-        var category = mapper.Map<Category>(request);
-        category.Id = Guid.NewGuid();
-        category.WalletId = walletId;
-        category.CreatedAtUtc = DateTime.UtcNow;
-
-        await categoryRepository.AddAsync(category);
-
-        var response = mapper.Map<CategoryResponseDto>(category);
-        return ServiceResult<CategoryResponseDto>.Success(response, "Category created successfully.", statusCode: 201);
     }
 
     public async Task<ServiceResult<CategoryResponseDto>> UpdateCategoryAsync(Guid categoryId, string userId, UpdateCategoryDto request)
@@ -83,7 +85,6 @@ public class CategoryService(
         }
 
         await categoryRepository.DeleteAsync(category);
-
         return ServiceResult<bool>.Success(true, "Category deleted successfully.");
     }
 }

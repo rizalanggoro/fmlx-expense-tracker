@@ -10,7 +10,6 @@ public class CategoryMappingProfile : Profile
     {
         CreateMap<CreateCategoryDto, Category>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.WalletId, opt => opt.Ignore())
             .ForMember(dest => dest.Wallet, opt => opt.Ignore())
             .ForMember(dest => dest.Transactions, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAtUtc, opt => opt.Ignore())

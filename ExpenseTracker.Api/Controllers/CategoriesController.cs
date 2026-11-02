@@ -17,8 +17,8 @@ public class CategoriesController(
     IValidator<UpdateCategoryDto> updateValidator
 ) : ControllerBase
 {
-    [HttpPost("~/api/wallets/{walletId:guid}/categories")]
-    public async Task<IActionResult> CreateCategory(Guid walletId, [FromBody] CreateCategoryDto request)
+    [HttpPost]
+    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto request)
     {
         var validation = await createValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -39,19 +39,19 @@ public class CategoriesController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await categoryService.CreateCategoryAsync(walletId, userId, request);
+        var result = await categoryService.CreateCategoryAsync(userId, request);
 
         return StatusCode(result.StatusCode, result);
     }
 
-    [HttpGet("~/api/wallets/{walletId:guid}/categories")]
-    public async Task<IActionResult> GetCategoriesByWallet(Guid walletId)
+    [HttpGet]
+    public async Task<IActionResult> GetCategories([FromQuery] Guid? walletId = null)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await categoryService.GetCategoriesByWalletIdAsync(walletId, userId);
+        var result = await categoryService.GetCategoriesAsync(userId, walletId);
 
         return StatusCode(result.StatusCode, result);
     }

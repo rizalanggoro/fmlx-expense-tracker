@@ -11,7 +11,6 @@ public class TransactionMappingProfile : Profile
     {
         CreateMap<CreateTransactionDto, Transaction>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.CategoryId, opt => opt.Ignore())
             .ForMember(dest => dest.Category, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAtUtc, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAtUtc, opt => opt.Ignore());
@@ -28,4 +27,3 @@ public class TransactionMappingProfile : Profile
             .ForMember(dest => dest.CategoryType, opt => opt.MapFrom(src => src.Category != null ? src.Category.Type : (CategoryType)0));
     }
 }
-

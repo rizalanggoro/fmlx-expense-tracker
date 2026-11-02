@@ -7,6 +7,9 @@ public class CreateCategoryValidator : AbstractValidator<CreateCategoryDto>
 {
     public CreateCategoryValidator()
     {
+        RuleFor(x => x.WalletId)
+            .NotEmpty().WithMessage("Wallet ID is required.");
+
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Category name is required.")
             .MaximumLength(100).WithMessage("Category name cannot exceed 100 characters.");
@@ -15,4 +18,3 @@ public class CreateCategoryValidator : AbstractValidator<CreateCategoryDto>
             .IsInEnum().WithMessage("Type must be either 1 (Income) or 2 (Expense).");
     }
 }
-

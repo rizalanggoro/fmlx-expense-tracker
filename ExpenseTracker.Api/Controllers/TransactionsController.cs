@@ -17,8 +17,8 @@ public class TransactionsController(
     IValidator<UpdateTransactionDto> updateValidator
 ) : ControllerBase
 {
-    [HttpPost("~/api/categories/{categoryId:guid}/transactions")]
-    public async Task<IActionResult> CreateTransaction(Guid categoryId, [FromBody] CreateTransactionDto request)
+    [HttpPost]
+    public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionDto request)
     {
         var validation = await createValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -39,26 +39,27 @@ public class TransactionsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await transactionService.CreateTransactionAsync(categoryId, userId, request);
+        var result = await transactionService.CreateTransactionAsync(userId, request);
 
         return StatusCode(result.StatusCode, result);
     }
 
-    [HttpGet("~/api/categories/{categoryId:guid}/transactions")]
-    public async Task<IActionResult> GetTransactionsByCategory(
-        Guid categoryId,
+    [HttpGet]
+    public async Task<IActionResult> GetTransactions(
+        [FromQuery] Guid? categoryId = null,
         [FromQuery] int pageIndex = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] DateTime? startDate = null,
-        [FromQuery] DateTime? endDate = null)
+        [FromQuery] DateTime? endDate = null
+    )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await transactionService.GetPagedTransactionsByCategoryIdAsync(
-            categoryId,
+        var result = await transactionService.GetPagedTransactionsAsync(
             userId,
+            categoryId,
             pageIndex,
             pageSize,
             startDate,

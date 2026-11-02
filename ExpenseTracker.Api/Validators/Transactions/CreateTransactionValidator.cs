@@ -7,6 +7,9 @@ public class CreateTransactionValidator : AbstractValidator<CreateTransactionDto
 {
     public CreateTransactionValidator()
     {
+        RuleFor(x => x.CategoryId)
+            .NotEmpty().WithMessage("Category ID is required.");
+
         RuleFor(x => x.Amount)
             .GreaterThan(0).WithMessage("Amount must be greater than zero.");
 
@@ -18,4 +21,3 @@ public class CreateTransactionValidator : AbstractValidator<CreateTransactionDto
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
     }
 }
-

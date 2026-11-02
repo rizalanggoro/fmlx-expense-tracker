@@ -7,6 +7,23 @@ namespace ExpenseTracker.Api.Repositories.Implementations;
 
 public class CategoryRepository(ApplicationDbContext context) : ICategoryRepository
 {
+    public async Task<IReadOnlyList<Category>> GetCategoriesAsync(string userId, Guid? walletId = null)
+    {
+        var query = context.Categories
+            .AsNoTracking()
+            .Where(c => c.Wallet.UserId == userId);
+
+        if (walletId.HasValue)
+        {
+            query = query.Where(c => c.WalletId == walletId.Value);
+        }
+
+        return await query
+            .Include(c => c.Transactions)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+    }
+
     public async Task<IReadOnlyList<Category>> GetCategoriesByWalletIdAsync(Guid walletId)
     {
         return await context.Categories
