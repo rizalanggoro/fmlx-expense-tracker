@@ -62,3 +62,4 @@ public class TransactionRepository : GenericRepository<Transaction>, ITransactio
             .AnyAsync(t => t.Id == transactionId && t.Category.Wallet.UserId == userId);
     }
 }
+

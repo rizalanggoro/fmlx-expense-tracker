@@ -7,3 +7,4 @@ public class CreateWalletDto
     public decimal InitialBalance { get; set; } = 0.00m;
     public string? Description { get; set; }
 }
+

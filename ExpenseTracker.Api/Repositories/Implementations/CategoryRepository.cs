@@ -35,3 +35,4 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
             .AnyAsync(c => c.Id == categoryId && c.Wallet.UserId == userId);
     }
 }
+

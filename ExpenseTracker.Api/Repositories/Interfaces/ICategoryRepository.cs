@@ -8,3 +8,4 @@ public interface ICategoryRepository : IGenericRepository<Category>
     Task<Category?> GetCategoryWithWalletAsync(Guid categoryId);
     Task<bool> CategoryBelongsToUserAsync(Guid categoryId, string userId);
 }
+

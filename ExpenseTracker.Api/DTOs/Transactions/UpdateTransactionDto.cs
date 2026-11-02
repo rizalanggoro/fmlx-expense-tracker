@@ -6,3 +6,4 @@ public class UpdateTransactionDto
     public DateTime TransactionDate { get; set; }
     public string? Description { get; set; }
 }
+

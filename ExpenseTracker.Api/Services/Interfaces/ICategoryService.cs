@@ -11,3 +11,4 @@ public interface ICategoryService
     Task<ServiceResult<CategoryResponseDto>> UpdateCategoryAsync(Guid categoryId, string userId, UpdateCategoryDto request);
     Task<ServiceResult<bool>> DeleteCategoryAsync(Guid categoryId, string userId);
 }
+

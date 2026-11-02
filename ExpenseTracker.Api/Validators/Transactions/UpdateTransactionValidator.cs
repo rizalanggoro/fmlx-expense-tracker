@@ -18,3 +18,4 @@ public class UpdateTransactionValidator : AbstractValidator<UpdateTransactionDto
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
     }
 }
+

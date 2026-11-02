@@ -6,3 +6,4 @@ public class WalletDetailResponseDto : WalletResponseDto
 {
     public IReadOnlyList<CategoryResponseDto> Categories { get; set; } = [];
 }
+

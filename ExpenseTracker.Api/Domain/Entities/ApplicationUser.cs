@@ -10,3 +10,4 @@ public class ApplicationUser : IdentityUser
     // Navigation property
     public ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
 }
+

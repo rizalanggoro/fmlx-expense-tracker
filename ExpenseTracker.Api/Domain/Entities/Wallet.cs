@@ -15,3 +15,4 @@ public class Wallet
     public ApplicationUser User { get; set; } = null!;
     public ICollection<Category> Categories { get; set; } = new List<Category>();
 }
+

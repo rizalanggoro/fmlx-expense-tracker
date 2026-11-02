@@ -60,3 +60,4 @@ public class CategoriesController : ApiControllerBase
         return HandleResult(result);
     }
 }
+

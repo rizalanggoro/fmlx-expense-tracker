@@ -96,3 +96,4 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CategoryType, opt => opt.MapFrom(src => src.Category != null ? src.Category.Type : (CategoryType)0));
     }
 }
+

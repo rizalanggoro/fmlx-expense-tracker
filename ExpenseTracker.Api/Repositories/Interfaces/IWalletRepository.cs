@@ -8,3 +8,4 @@ public interface IWalletRepository : IGenericRepository<Wallet>
     Task<Wallet?> GetWalletWithDetailsAsync(Guid walletId, string userId);
     Task<bool> ExistsAsync(Guid walletId, string userId);
 }
+

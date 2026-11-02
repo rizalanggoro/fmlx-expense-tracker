@@ -13,3 +13,4 @@ public class Transaction
     // Navigation properties
     public Category Category { get; set; } = null!;
 }
+

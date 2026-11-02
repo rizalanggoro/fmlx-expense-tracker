@@ -43,3 +43,4 @@ public class AuthController : ApiControllerBase
         return HandleResult(result);
     }
 }
+

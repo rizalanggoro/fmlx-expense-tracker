@@ -10,3 +10,4 @@ public interface ITransactionRepository : IGenericRepository<Transaction>
     Task<Transaction?> GetTransactionWithCategoryAndWalletAsync(Guid transactionId);
     Task<bool> TransactionBelongsToUserAsync(Guid transactionId, string userId);
 }
+

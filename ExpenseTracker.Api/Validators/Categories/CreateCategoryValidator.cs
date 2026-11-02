@@ -15,3 +15,4 @@ public class CreateCategoryValidator : AbstractValidator<CreateCategoryDto>
             .IsInEnum().WithMessage("Type must be either 1 (Income) or 2 (Expense).");
     }
 }
+

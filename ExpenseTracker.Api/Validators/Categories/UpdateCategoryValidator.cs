@@ -15,3 +15,4 @@ public class UpdateCategoryValidator : AbstractValidator<UpdateCategoryDto>
             .IsInEnum().WithMessage("Type must be either 1 (Income) or 2 (Expense).");
     }
 }
+

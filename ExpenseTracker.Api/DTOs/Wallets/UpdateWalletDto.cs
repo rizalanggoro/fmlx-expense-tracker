@@ -6,3 +6,4 @@ public class UpdateWalletDto
     public string Currency { get; set; } = "IDR";
     public string? Description { get; set; }
 }
+

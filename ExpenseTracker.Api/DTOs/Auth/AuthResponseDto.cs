@@ -6,3 +6,4 @@ public class AuthResponseDto
     public DateTime ExpiresAtUtc { get; set; }
     public UserResponseDto User { get; set; } = null!;
 }
+

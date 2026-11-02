@@ -11,3 +11,4 @@ public interface IWalletService
     Task<ServiceResult<WalletResponseDto>> UpdateWalletAsync(Guid walletId, string userId, UpdateWalletDto request);
     Task<ServiceResult<bool>> DeleteWalletAsync(Guid walletId, string userId);
 }
+

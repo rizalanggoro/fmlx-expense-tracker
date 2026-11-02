@@ -13,3 +13,4 @@ public interface ITransactionService
     Task<ServiceResult<TransactionResponseDto>> UpdateTransactionAsync(Guid transactionId, string userId, UpdateTransactionDto request);
     Task<ServiceResult<bool>> DeleteTransactionAsync(Guid transactionId, string userId);
 }
+

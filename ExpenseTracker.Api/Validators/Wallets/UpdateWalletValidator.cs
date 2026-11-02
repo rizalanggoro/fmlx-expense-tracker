@@ -19,3 +19,4 @@ public class UpdateWalletValidator : AbstractValidator<UpdateWalletDto>
             .MaximumLength(255).WithMessage("Description cannot exceed 255 characters.");
     }
 }
+

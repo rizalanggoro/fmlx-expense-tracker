@@ -26,3 +26,4 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequestDto>
             .MaximumLength(100).WithMessage("FullName cannot exceed 100 characters.");
     }
 }
+

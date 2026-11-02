@@ -6,3 +6,4 @@ public class CreateTransactionDto
     public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
     public string? Description { get; set; }
 }
+

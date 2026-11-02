@@ -44,3 +44,4 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         builder.HasIndex(w => new { w.UserId, w.Name });
     }
 }
+

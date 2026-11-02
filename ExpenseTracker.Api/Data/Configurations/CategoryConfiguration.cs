@@ -36,3 +36,4 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.HasIndex(c => new { c.WalletId, c.Name });
     }
 }
+

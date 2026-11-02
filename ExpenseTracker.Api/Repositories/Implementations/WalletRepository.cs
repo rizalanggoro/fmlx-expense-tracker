@@ -38,3 +38,4 @@ public class WalletRepository : GenericRepository<Wallet>, IWalletRepository
             .AnyAsync(w => w.Id == walletId && w.UserId == userId);
     }
 }
+
