@@ -490,3 +490,4 @@ docs/
 *.db
 *.db-shm
 *.db-wal
+.ignore

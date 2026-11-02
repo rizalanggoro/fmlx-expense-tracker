@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.DTOs.Categories;
 using ExpenseTracker.Api.Services.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +12,9 @@ namespace ExpenseTracker.Api.Controllers;
 [Route("api/v1/[controller]")]
 [Authorize]
 public class CategoriesController(
-    ICategoryService categoryService
+    ICategoryService categoryService,
+    IValidator<CreateCategoryDto> createValidator,
+    IValidator<UpdateCategoryDto> updateValidator
 ) : ControllerBase
 {
     [HttpGet("~/api/v1/wallets/{walletId:guid}/categories")]
@@ -36,6 +40,13 @@ public class CategoriesController(
     [HttpPost("~/api/v1/wallets/{walletId:guid}/categories")]
     public async Task<IActionResult> CreateCategory(Guid walletId, [FromBody] CreateCategoryDto request)
     {
+        var validation = await createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
+            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
@@ -46,6 +57,13 @@ public class CategoriesController(
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] UpdateCategoryDto request)
     {
+        var validation = await updateValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
+            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 

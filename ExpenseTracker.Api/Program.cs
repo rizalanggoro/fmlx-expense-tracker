@@ -3,11 +3,19 @@ using dotenv.net;
 using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Domain.Entities;
+using ExpenseTracker.Api.DTOs.Auth;
+using ExpenseTracker.Api.DTOs.Categories;
+using ExpenseTracker.Api.DTOs.Transactions;
+using ExpenseTracker.Api.DTOs.Wallets;
 using ExpenseTracker.Api.Mappings;
 using ExpenseTracker.Api.Repositories.Implementations;
 using ExpenseTracker.Api.Repositories.Interfaces;
 using ExpenseTracker.Api.Services.Implementations;
 using ExpenseTracker.Api.Services.Interfaces;
+using ExpenseTracker.Api.Validators.Auth;
+using ExpenseTracker.Api.Validators.Categories;
+using ExpenseTracker.Api.Validators.Transactions;
+using ExpenseTracker.Api.Validators.Wallets;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -86,24 +94,17 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
 // 7. FluentValidation
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddScoped<IValidator<RegisterRequestDto>, RegisterRequestValidator>();
+builder.Services.AddScoped<IValidator<LoginRequestDto>, LoginRequestValidator>();
+builder.Services.AddScoped<IValidator<CreateWalletDto>, CreateWalletValidator>();
+builder.Services.AddScoped<IValidator<UpdateWalletDto>, UpdateWalletValidator>();
+builder.Services.AddScoped<IValidator<CreateCategoryDto>, CreateCategoryValidator>();
+builder.Services.AddScoped<IValidator<UpdateCategoryDto>, UpdateCategoryValidator>();
+builder.Services.AddScoped<IValidator<CreateTransactionDto>, CreateTransactionValidator>();
+builder.Services.AddScoped<IValidator<UpdateTransactionDto>, UpdateTransactionValidator>();
 
-// 8. Controllers & Validation Error Response Customization
-builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var errors = context.ModelState
-                .Where(e => e.Value?.Errors.Count > 0)
-                .SelectMany(e => e.Value!.Errors.Select(x => x.ErrorMessage))
-                .ToList();
-
-            var result = ServiceResult<object>.Failure("Validation failed", errors, StatusCodes.Status400BadRequest);
-            return new BadRequestObjectResult(result);
-        };
-    });
+// 8. Controllers
+builder.Services.AddControllers();
 
 // 9. Swagger / OpenAPI with Bearer Authorization
 builder.Services.AddEndpointsApiExplorer();

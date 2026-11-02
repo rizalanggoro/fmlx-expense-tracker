@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.DTOs.Transactions;
 using ExpenseTracker.Api.Services.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +12,9 @@ namespace ExpenseTracker.Api.Controllers;
 [Route("api/v1/[controller]")]
 [Authorize]
 public class TransactionsController(
-    ITransactionService transactionService
+    ITransactionService transactionService,
+    IValidator<CreateTransactionDto> createValidator,
+    IValidator<UpdateTransactionDto> updateValidator
 ) : ControllerBase
 {
     [HttpGet("~/api/v1/categories/{categoryId:guid}/transactions")]
@@ -43,6 +47,13 @@ public class TransactionsController(
     [HttpPost("~/api/v1/categories/{categoryId:guid}/transactions")]
     public async Task<IActionResult> CreateTransaction(Guid categoryId, [FromBody] CreateTransactionDto request)
     {
+        var validation = await createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
+            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
@@ -53,6 +64,13 @@ public class TransactionsController(
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionDto request)
     {
+        var validation = await updateValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
+            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
