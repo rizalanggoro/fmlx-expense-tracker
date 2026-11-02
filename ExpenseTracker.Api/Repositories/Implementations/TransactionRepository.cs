@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Repositories.Implementations;
 
-public class TransactionRepository(ApplicationDbContext context) : GenericRepository<Transaction>(context), ITransactionRepository
+public class TransactionRepository(ApplicationDbContext context) : ITransactionRepository
 {
     public async Task<IReadOnlyList<Transaction>> GetTransactionsByCategoryIdAsync(Guid categoryId)
     {
-        return await _dbSet
+        return await context.Transactions
             .AsNoTracking()
             .Where(t => t.CategoryId == categoryId)
             .OrderByDescending(t => t.TransactionDate)
@@ -19,7 +19,7 @@ public class TransactionRepository(ApplicationDbContext context) : GenericReposi
     public async Task<(IReadOnlyList<Transaction> Items, int TotalCount)> GetPagedTransactionsByCategoryIdAsync(
         Guid categoryId, int pageIndex, int pageSize, DateTime? startDate = null, DateTime? endDate = null)
     {
-        var query = _dbSet
+        var query = context.Transactions
             .AsNoTracking()
             .Where(t => t.CategoryId == categoryId);
 
@@ -45,7 +45,7 @@ public class TransactionRepository(ApplicationDbContext context) : GenericReposi
 
     public async Task<Transaction?> GetTransactionWithCategoryAndWalletAsync(Guid transactionId)
     {
-        return await _dbSet
+        return await context.Transactions
             .Include(t => t.Category)
                 .ThenInclude(c => c.Wallet)
             .FirstOrDefaultAsync(t => t.Id == transactionId);
@@ -53,8 +53,27 @@ public class TransactionRepository(ApplicationDbContext context) : GenericReposi
 
     public async Task<bool> TransactionBelongsToUserAsync(Guid transactionId, string userId)
     {
-        return await _dbSet
+        return await context.Transactions
             .AsNoTracking()
             .AnyAsync(t => t.Id == transactionId && t.Category.Wallet.UserId == userId);
+    }
+
+    public async Task<Transaction> AddAsync(Transaction transaction)
+    {
+        await context.Transactions.AddAsync(transaction);
+        await context.SaveChangesAsync();
+        return transaction;
+    }
+
+    public async Task UpdateAsync(Transaction transaction)
+    {
+        context.Transactions.Update(transaction);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Transaction transaction)
+    {
+        context.Transactions.Remove(transaction);
+        await context.SaveChangesAsync();
     }
 }
