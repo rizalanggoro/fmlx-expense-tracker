@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ExpenseTracker.Api.DTOs.Transactions;
 using ExpenseTracker.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -5,8 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.Api.Controllers;
 
+[ApiController]
+[Route("api/v1/[controller]")]
 [Authorize]
-public class TransactionsController : ApiControllerBase
+public class TransactionsController : ControllerBase
 {
     private readonly ITransactionService _transactionService;
 
@@ -23,48 +26,52 @@ public class TransactionsController : ApiControllerBase
         [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null)
     {
-        if (string.IsNullOrEmpty(CurrentUserId)) return Unauthorized();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
         var result = await _transactionService.GetPagedTransactionsByCategoryIdAsync(
-            categoryId, CurrentUserId, pageIndex, pageSize, startDate, endDate);
+            categoryId, userId, pageIndex, pageSize, startDate, endDate);
 
-        return HandleResult(result);
+        return StatusCode(result.StatusCode, result);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetTransactionById(Guid id)
     {
-        if (string.IsNullOrEmpty(CurrentUserId)) return Unauthorized();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.GetTransactionByIdAsync(id, CurrentUserId);
-        return HandleResult(result);
+        var result = await _transactionService.GetTransactionByIdAsync(id, userId);
+        return StatusCode(result.StatusCode, result);
     }
 
     [HttpPost("~/api/v1/categories/{categoryId:guid}/transactions")]
     public async Task<IActionResult> CreateTransaction(Guid categoryId, [FromBody] CreateTransactionDto request)
     {
-        if (string.IsNullOrEmpty(CurrentUserId)) return Unauthorized();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.CreateTransactionAsync(categoryId, CurrentUserId, request);
-        return HandleResult(result);
+        var result = await _transactionService.CreateTransactionAsync(categoryId, userId, request);
+        return StatusCode(result.StatusCode, result);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionDto request)
     {
-        if (string.IsNullOrEmpty(CurrentUserId)) return Unauthorized();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.UpdateTransactionAsync(id, CurrentUserId, request);
-        return HandleResult(result);
+        var result = await _transactionService.UpdateTransactionAsync(id, userId, request);
+        return StatusCode(result.StatusCode, result);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteTransaction(Guid id)
     {
-        if (string.IsNullOrEmpty(CurrentUserId)) return Unauthorized();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.DeleteTransactionAsync(id, CurrentUserId);
-        return HandleResult(result);
+        var result = await _transactionService.DeleteTransactionAsync(id, userId);
+        return StatusCode(result.StatusCode, result);
     }
 }
-
