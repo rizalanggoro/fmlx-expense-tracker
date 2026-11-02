@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Repositories.Implementations;
 
-public class WalletRepository : GenericRepository<Wallet>, IWalletRepository
+public class WalletRepository(ApplicationDbContext context) : GenericRepository<Wallet>(context), IWalletRepository
 {
-    public WalletRepository(ApplicationDbContext context) : base(context)
-    {
-    }
-
     public async Task<IReadOnlyList<Wallet>> GetWalletsByUserIdAsync(string userId)
     {
         return await _dbSet
@@ -38,4 +34,3 @@ public class WalletRepository : GenericRepository<Wallet>, IWalletRepository
             .AnyAsync(w => w.Id == walletId && w.UserId == userId);
     }
 }
-

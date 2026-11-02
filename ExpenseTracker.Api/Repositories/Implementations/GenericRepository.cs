@@ -5,16 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Repositories.Implementations;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T>(ApplicationDbContext context) : IGenericRepository<T> where T : class
 {
-    protected readonly ApplicationDbContext _context;
-    protected readonly DbSet<T> _dbSet;
-
-    public GenericRepository(ApplicationDbContext context)
-    {
-        _context = context;
-        _dbSet = context.Set<T>();
-    }
+    protected readonly ApplicationDbContext _context = context;
+    protected readonly DbSet<T> _dbSet = context.Set<T>();
 
     public virtual async Task<T?> GetByIdAsync(Guid id)
     {
@@ -34,17 +28,19 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public virtual async Task<T> AddAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
+        await _context.SaveChangesAsync();
         return entity;
     }
 
-    public virtual void Update(T entity)
+    public virtual async Task UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
+        await _context.SaveChangesAsync();
     }
 
-    public virtual void Remove(T entity)
+    public virtual async Task DeleteAsync(T entity)
     {
         _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
     }
 }
-

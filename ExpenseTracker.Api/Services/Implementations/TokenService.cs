@@ -9,7 +9,7 @@ namespace ExpenseTracker.Api.Services.Implementations;
 
 public class TokenService : ITokenService
 {
-    public (string Token, DateTime ExpiresAtUtc) GenerateToken(ApplicationUser user)
+    public string GenerateToken(ApplicationUser user)
     {
         var secretKey = Environment.GetEnvironmentVariable("JWT_KEY")!;
         var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!;
@@ -47,6 +47,6 @@ public class TokenService : ITokenService
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
-        return (tokenHandler.WriteToken(token), expiresAtUtc);
+        return tokenHandler.WriteToken(token);
     }
 }

@@ -7,31 +7,21 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ExpenseTracker.Api.Services.Implementations;
 
-public class AuthService : IAuthService
+public class AuthService(
+    UserManager<ApplicationUser> userManager,
+    ITokenService tokenService,
+    IMapper mapper
+) : IAuthService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ITokenService _tokenService;
-    private readonly IMapper _mapper;
-
-    public AuthService(
-        UserManager<ApplicationUser> userManager,
-        ITokenService tokenService,
-        IMapper mapper)
-    {
-        _userManager = userManager;
-        _tokenService = tokenService;
-        _mapper = mapper;
-    }
-
     public async Task<ServiceResult<AuthResponseDto>> RegisterAsync(RegisterRequestDto request)
     {
-        var existingEmail = await _userManager.FindByEmailAsync(request.Email);
+        var existingEmail = await userManager.FindByEmailAsync(request.Email);
         if (existingEmail != null)
         {
             return ServiceResult<AuthResponseDto>.Failure("An account with this email address already exists.", statusCode: 409);
         }
 
-        var existingUser = await _userManager.FindByNameAsync(request.UserName);
+        var existingUser = await userManager.FindByNameAsync(request.UserName);
         if (existingUser != null)
         {
             return ServiceResult<AuthResponseDto>.Failure("An account with this username already exists.", statusCode: 409);
@@ -45,20 +35,19 @@ public class AuthService : IAuthService
             CreatedAtUtc = DateTime.UtcNow
         };
 
-        var result = await _userManager.CreateAsync(user, request.Password);
+        var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
             var errors = result.Errors.Select(e => e.Description).ToList();
             return ServiceResult<AuthResponseDto>.Failure("Registration failed.", errors, statusCode: 400);
         }
 
-        var (token, expiresAtUtc) = _tokenService.GenerateToken(user);
-        var userDto = _mapper.Map<UserResponseDto>(user);
+        var token = tokenService.GenerateToken(user);
+        var userDto = mapper.Map<UserResponseDto>(user);
 
         var response = new AuthResponseDto
         {
             Token = token,
-            ExpiresAtUtc = expiresAtUtc,
             User = userDto
         };
 
@@ -71,11 +60,11 @@ public class AuthService : IAuthService
 
         if (request.EmailOrUserName.Contains('@'))
         {
-            user = await _userManager.FindByEmailAsync(request.EmailOrUserName);
+            user = await userManager.FindByEmailAsync(request.EmailOrUserName);
         }
         else
         {
-            user = await _userManager.FindByNameAsync(request.EmailOrUserName);
+            user = await userManager.FindByNameAsync(request.EmailOrUserName);
         }
 
         if (user == null)
@@ -83,19 +72,18 @@ public class AuthService : IAuthService
             return ServiceResult<AuthResponseDto>.Failure("Invalid email/username or password.", statusCode: 401);
         }
 
-        var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+        var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
         if (!isPasswordValid)
         {
             return ServiceResult<AuthResponseDto>.Failure("Invalid email/username or password.", statusCode: 401);
         }
 
-        var (token, expiresAtUtc) = _tokenService.GenerateToken(user);
-        var userDto = _mapper.Map<UserResponseDto>(user);
+        var token = tokenService.GenerateToken(user);
+        var userDto = mapper.Map<UserResponseDto>(user);
 
         var response = new AuthResponseDto
         {
             Token = token,
-            ExpiresAtUtc = expiresAtUtc,
             User = userDto
         };
 
@@ -104,14 +92,13 @@ public class AuthService : IAuthService
 
     public async Task<ServiceResult<UserResponseDto>> GetCurrentUserAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId);
         if (user == null)
         {
             return ServiceResult<UserResponseDto>.NotFound("User not found.");
         }
 
-        var userDto = _mapper.Map<UserResponseDto>(user);
+        var userDto = mapper.Map<UserResponseDto>(user);
         return ServiceResult<UserResponseDto>.Success(userDto);
     }
 }
-

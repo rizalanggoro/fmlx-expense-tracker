@@ -70,11 +70,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 4. Repositories and Unit of Work
+// 4. Repositories
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // 5. Application Services
 builder.Services.AddScoped<ITokenService, TokenService>();
