@@ -9,22 +9,17 @@ namespace ExpenseTracker.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class WalletsController : ControllerBase
+public class WalletsController(
+    IWalletService walletService
+) : ControllerBase
 {
-    private readonly IWalletService _walletService;
-
-    public WalletsController(IWalletService walletService)
-    {
-        _walletService = walletService;
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetWallets()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _walletService.GetWalletsAsync(userId);
+        var result = await walletService.GetWalletsAsync(userId);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -34,7 +29,7 @@ public class WalletsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _walletService.GetWalletByIdAsync(id, userId);
+        var result = await walletService.GetWalletByIdAsync(id, userId);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -44,7 +39,7 @@ public class WalletsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _walletService.CreateWalletAsync(userId, request);
+        var result = await walletService.CreateWalletAsync(userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -54,7 +49,7 @@ public class WalletsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _walletService.UpdateWalletAsync(id, userId, request);
+        var result = await walletService.UpdateWalletAsync(id, userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -64,7 +59,7 @@ public class WalletsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _walletService.DeleteWalletAsync(id, userId);
+        var result = await walletService.DeleteWalletAsync(id, userId);
         return StatusCode(result.StatusCode, result);
     }
 }

@@ -9,15 +9,10 @@ namespace ExpenseTracker.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class TransactionsController : ControllerBase
+public class TransactionsController(
+    ITransactionService transactionService
+) : ControllerBase
 {
-    private readonly ITransactionService _transactionService;
-
-    public TransactionsController(ITransactionService transactionService)
-    {
-        _transactionService = transactionService;
-    }
-
     [HttpGet("~/api/v1/categories/{categoryId:guid}/transactions")]
     public async Task<IActionResult> GetTransactionsByCategory(
         Guid categoryId,
@@ -29,7 +24,7 @@ public class TransactionsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.GetPagedTransactionsByCategoryIdAsync(
+        var result = await transactionService.GetPagedTransactionsByCategoryIdAsync(
             categoryId, userId, pageIndex, pageSize, startDate, endDate);
 
         return StatusCode(result.StatusCode, result);
@@ -41,7 +36,7 @@ public class TransactionsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.GetTransactionByIdAsync(id, userId);
+        var result = await transactionService.GetTransactionByIdAsync(id, userId);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -51,7 +46,7 @@ public class TransactionsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.CreateTransactionAsync(categoryId, userId, request);
+        var result = await transactionService.CreateTransactionAsync(categoryId, userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -61,7 +56,7 @@ public class TransactionsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.UpdateTransactionAsync(id, userId, request);
+        var result = await transactionService.UpdateTransactionAsync(id, userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -71,7 +66,7 @@ public class TransactionsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _transactionService.DeleteTransactionAsync(id, userId);
+        var result = await transactionService.DeleteTransactionAsync(id, userId);
         return StatusCode(result.StatusCode, result);
     }
 }

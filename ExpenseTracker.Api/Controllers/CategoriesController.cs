@@ -9,22 +9,17 @@ namespace ExpenseTracker.Api.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class CategoriesController : ControllerBase
+public class CategoriesController(
+    ICategoryService categoryService
+) : ControllerBase
 {
-    private readonly ICategoryService _categoryService;
-
-    public CategoriesController(ICategoryService categoryService)
-    {
-        _categoryService = categoryService;
-    }
-
     [HttpGet("~/api/v1/wallets/{walletId:guid}/categories")]
     public async Task<IActionResult> GetCategoriesByWallet(Guid walletId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _categoryService.GetCategoriesByWalletIdAsync(walletId, userId);
+        var result = await categoryService.GetCategoriesByWalletIdAsync(walletId, userId);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -34,7 +29,7 @@ public class CategoriesController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _categoryService.GetCategoryByIdAsync(id, userId);
+        var result = await categoryService.GetCategoryByIdAsync(id, userId);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -44,7 +39,7 @@ public class CategoriesController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _categoryService.CreateCategoryAsync(walletId, userId, request);
+        var result = await categoryService.CreateCategoryAsync(walletId, userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -54,7 +49,7 @@ public class CategoriesController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _categoryService.UpdateCategoryAsync(id, userId, request);
+        var result = await categoryService.UpdateCategoryAsync(id, userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -64,7 +59,7 @@ public class CategoriesController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var result = await _categoryService.DeleteCategoryAsync(id, userId);
+        var result = await categoryService.DeleteCategoryAsync(id, userId);
         return StatusCode(result.StatusCode, result);
     }
 }
