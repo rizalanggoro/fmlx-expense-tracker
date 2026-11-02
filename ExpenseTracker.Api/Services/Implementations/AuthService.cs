@@ -17,15 +17,17 @@ public class AuthService(
     {
         var existingEmail = await userManager.FindByEmailAsync(request.Email);
         if (existingEmail != null)
-        {
-            return ServiceResult<AuthResponseDto>.Failure("An account with this email address already exists.", statusCode: 409);
-        }
+            return ServiceResult<AuthResponseDto>.Failure(
+                "An account with this email address already exists.",
+                statusCode: 409
+            );
 
         var existingUser = await userManager.FindByNameAsync(request.UserName);
         if (existingUser != null)
-        {
-            return ServiceResult<AuthResponseDto>.Failure("An account with this username already exists.", statusCode: 409);
-        }
+            return ServiceResult<AuthResponseDto>.Failure(
+                "An account with this username already exists.",
+                statusCode: 409
+            );
 
         var user = new ApplicationUser
         {
@@ -38,8 +40,14 @@ public class AuthService(
         var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            var errors = result.Errors.Select(e => e.Description).ToList();
-            return ServiceResult<AuthResponseDto>.Failure("Registration failed.", errors, statusCode: 400);
+            var errors = result.Errors
+                .Select(e => e.Description)
+                .ToList();
+
+            return ServiceResult<AuthResponseDto>.Failure(
+                "Registration failed.",
+                errors
+            );
         }
 
         var token = tokenService.GenerateToken(user);
@@ -51,32 +59,34 @@ public class AuthService(
             User = userDto
         };
 
-        return ServiceResult<AuthResponseDto>.Success(response, "User registered successfully.", statusCode: 201);
+        return ServiceResult<AuthResponseDto>.Success(
+            response,
+            "User registered successfully.",
+            201
+        );
     }
 
     public async Task<ServiceResult<AuthResponseDto>> LoginAsync(LoginRequestDto request)
     {
-        ApplicationUser? user = null;
+        ApplicationUser? user;
 
         if (request.EmailOrUserName.Contains('@'))
-        {
             user = await userManager.FindByEmailAsync(request.EmailOrUserName);
-        }
         else
-        {
             user = await userManager.FindByNameAsync(request.EmailOrUserName);
-        }
 
         if (user == null)
-        {
-            return ServiceResult<AuthResponseDto>.Failure("Invalid email/username or password.", statusCode: 401);
-        }
+            return ServiceResult<AuthResponseDto>.Failure(
+                "Invalid email/username or password.",
+                statusCode: 401
+            );
 
         var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
         if (!isPasswordValid)
-        {
-            return ServiceResult<AuthResponseDto>.Failure("Invalid email/username or password.", statusCode: 401);
-        }
+            return ServiceResult<AuthResponseDto>.Failure(
+                "Invalid email/username or password.",
+                statusCode: 401
+            );
 
         var token = tokenService.GenerateToken(user);
         var userDto = mapper.Map<UserResponseDto>(user);
@@ -87,18 +97,20 @@ public class AuthService(
             User = userDto
         };
 
-        return ServiceResult<AuthResponseDto>.Success(response, "Login successful.");
+        return ServiceResult<AuthResponseDto>.Success(
+            response,
+            "Login successful."
+        );
     }
 
     public async Task<ServiceResult<UserResponseDto>> GetCurrentUserAsync(string userId)
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
-        {
             return ServiceResult<UserResponseDto>.NotFound("User not found.");
-        }
 
         var userDto = mapper.Map<UserResponseDto>(user);
+
         return ServiceResult<UserResponseDto>.Success(userDto);
     }
 }
