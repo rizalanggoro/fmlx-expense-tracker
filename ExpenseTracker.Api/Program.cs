@@ -1,4 +1,5 @@
 using System.Text;
+using dotenv.net;
 using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Domain.Entities;
@@ -16,11 +17,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
+// Load environment variables from .env file
+DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
+
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database Connection (PostgreSQL)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Host=localhost;Port=5432;Database=fmlx-expense-tracker;Username=postgres;Password=";
+// 1. Database Connection (PostgreSQL from .env or appsettings.json)
+var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new InvalidOperationException("Database connection string is not configured.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -37,10 +43,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// 3. JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "ExpenseTrackerSuperSecretSecureKeyForJwtToken2026!";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ExpenseTrackerApi";
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ExpenseTrackerClient";
+// 3. JWT Authentication (from .env or appsettings.json)
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? builder.Configuration["Jwt:Key"] 
+    ?? "ExpenseTrackerSuperSecretSecureKeyForJwtToken2026!";
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+    ?? builder.Configuration["Jwt:Issuer"] 
+    ?? "ExpenseTrackerApi";
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+    ?? builder.Configuration["Jwt:Audience"] 
+    ?? "ExpenseTrackerClient";
 
 builder.Services.AddAuthentication(options =>
 {

@@ -18,10 +18,18 @@ public class TokenService : ITokenService
 
     public (string Token, DateTime ExpiresAtUtc) GenerateToken(ApplicationUser user)
     {
-        var secretKey = _configuration["Jwt:Key"] ?? "ExpenseTrackerSuperSecretKeyWithAtLeast32BytesLength!";
-        var issuer = _configuration["Jwt:Issuer"] ?? "ExpenseTrackerApi";
-        var audience = _configuration["Jwt:Audience"] ?? "ExpenseTrackerClient";
-        var durationMinutes = int.TryParse(_configuration["Jwt:DurationInMinutes"], out var minutes) ? minutes : 1440; // 24 hours
+        var secretKey = Environment.GetEnvironmentVariable("JWT_KEY")
+            ?? _configuration["Jwt:Key"]
+            ?? "ExpenseTrackerSuperSecretSecureKeyForJwtToken2026!";
+        var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+            ?? _configuration["Jwt:Issuer"]
+            ?? "ExpenseTrackerApi";
+        var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+            ?? _configuration["Jwt:Audience"]
+            ?? "ExpenseTrackerClient";
+        var durationMinutesStr = Environment.GetEnvironmentVariable("JWT_DURATION_MINUTES")
+            ?? _configuration["Jwt:DurationInMinutes"];
+        var durationMinutes = int.TryParse(durationMinutesStr, out var minutes) ? minutes : 1440; // 24 hours
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
