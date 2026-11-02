@@ -485,3 +485,8 @@ $RECYCLE.BIN/
 
 # Custom
 exercise.md
+docs/
+# SQLite Databases
+*.db
+*.db-shm
+*.db-wal
