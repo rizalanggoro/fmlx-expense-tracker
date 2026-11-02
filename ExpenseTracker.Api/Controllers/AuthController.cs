@@ -23,11 +23,20 @@ public class AuthController(
         var validation = await registerValidator.ValidateAsync(request);
         if (!validation.IsValid)
         {
-            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
-            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+            var errors = validation.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(
+                ServiceResult<object>.Failure(
+                    "Validation failed",
+                    errors
+                )
+            );
         }
 
         var result = await authService.RegisterAsync(request);
+
         return StatusCode(result.StatusCode, result);
     }
 
@@ -38,11 +47,20 @@ public class AuthController(
         var validation = await loginValidator.ValidateAsync(request);
         if (!validation.IsValid)
         {
-            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
-            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+            var errors = validation.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(
+                ServiceResult<object>.Failure(
+                    "Validation failed",
+                    errors
+                )
+            );
         }
 
         var result = await authService.LoginAsync(request);
+
         return StatusCode(result.StatusCode, result);
     }
 
@@ -51,9 +69,11 @@ public class AuthController(
     public async Task<IActionResult> GetCurrentUser()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await authService.GetCurrentUserAsync(userId);
+
         return StatusCode(result.StatusCode, result);
     }
 }

@@ -17,13 +17,42 @@ public class CategoriesController(
     IValidator<UpdateCategoryDto> updateValidator
 ) : ControllerBase
 {
+    [HttpPost("~/api/wallets/{walletId:guid}/categories")]
+    public async Task<IActionResult> CreateCategory(Guid walletId, [FromBody] CreateCategoryDto request)
+    {
+        var validation = await createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            var errors = validation.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(
+                ServiceResult<object>.Failure(
+                    "Validation failed",
+                    errors
+                )
+            );
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var result = await categoryService.CreateCategoryAsync(walletId, userId, request);
+
+        return StatusCode(result.StatusCode, result);
+    }
+
     [HttpGet("~/api/wallets/{walletId:guid}/categories")]
     public async Task<IActionResult> GetCategoriesByWallet(Guid walletId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await categoryService.GetCategoriesByWalletIdAsync(walletId, userId);
+
         return StatusCode(result.StatusCode, result);
     }
 
@@ -31,26 +60,11 @@ public class CategoriesController(
     public async Task<IActionResult> GetCategoryById(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await categoryService.GetCategoryByIdAsync(id, userId);
-        return StatusCode(result.StatusCode, result);
-    }
 
-    [HttpPost("~/api/wallets/{walletId:guid}/categories")]
-    public async Task<IActionResult> CreateCategory(Guid walletId, [FromBody] CreateCategoryDto request)
-    {
-        var validation = await createValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-        {
-            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
-            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
-        }
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-        var result = await categoryService.CreateCategoryAsync(walletId, userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -60,14 +74,24 @@ public class CategoriesController(
         var validation = await updateValidator.ValidateAsync(request);
         if (!validation.IsValid)
         {
-            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
-            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+            var errors = validation.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(
+                ServiceResult<object>.Failure(
+                    "Validation failed",
+                    errors
+                )
+            );
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await categoryService.UpdateCategoryAsync(id, userId, request);
+
         return StatusCode(result.StatusCode, result);
     }
 
@@ -75,9 +99,11 @@ public class CategoriesController(
     public async Task<IActionResult> DeleteCategory(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await categoryService.DeleteCategoryAsync(id, userId);
+
         return StatusCode(result.StatusCode, result);
     }
 }

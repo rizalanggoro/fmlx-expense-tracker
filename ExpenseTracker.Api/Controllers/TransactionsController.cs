@@ -17,6 +17,33 @@ public class TransactionsController(
     IValidator<UpdateTransactionDto> updateValidator
 ) : ControllerBase
 {
+    [HttpPost("~/api/categories/{categoryId:guid}/transactions")]
+    public async Task<IActionResult> CreateTransaction(Guid categoryId, [FromBody] CreateTransactionDto request)
+    {
+        var validation = await createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            var errors = validation.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(
+                ServiceResult<object>.Failure(
+                    "Validation failed",
+                    errors
+                )
+            );
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var result = await transactionService.CreateTransactionAsync(categoryId, userId, request);
+
+        return StatusCode(result.StatusCode, result);
+    }
+
     [HttpGet("~/api/categories/{categoryId:guid}/transactions")]
     public async Task<IActionResult> GetTransactionsByCategory(
         Guid categoryId,
@@ -26,10 +53,17 @@ public class TransactionsController(
         [FromQuery] DateTime? endDate = null)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await transactionService.GetPagedTransactionsByCategoryIdAsync(
-            categoryId, userId, pageIndex, pageSize, startDate, endDate);
+            categoryId,
+            userId,
+            pageIndex,
+            pageSize,
+            startDate,
+            endDate
+        );
 
         return StatusCode(result.StatusCode, result);
     }
@@ -38,26 +72,11 @@ public class TransactionsController(
     public async Task<IActionResult> GetTransactionById(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await transactionService.GetTransactionByIdAsync(id, userId);
-        return StatusCode(result.StatusCode, result);
-    }
 
-    [HttpPost("~/api/categories/{categoryId:guid}/transactions")]
-    public async Task<IActionResult> CreateTransaction(Guid categoryId, [FromBody] CreateTransactionDto request)
-    {
-        var validation = await createValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-        {
-            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
-            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
-        }
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-        var result = await transactionService.CreateTransactionAsync(categoryId, userId, request);
         return StatusCode(result.StatusCode, result);
     }
 
@@ -67,14 +86,24 @@ public class TransactionsController(
         var validation = await updateValidator.ValidateAsync(request);
         if (!validation.IsValid)
         {
-            var errors = validation.Errors.Select(e => e.ErrorMessage).ToList();
-            return BadRequest(ServiceResult<object>.Failure("Validation failed", errors, 400));
+            var errors = validation.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(
+                ServiceResult<object>.Failure(
+                    "Validation failed",
+                    errors
+                )
+            );
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await transactionService.UpdateTransactionAsync(id, userId, request);
+
         return StatusCode(result.StatusCode, result);
     }
 
@@ -82,9 +111,11 @@ public class TransactionsController(
     public async Task<IActionResult> DeleteTransaction(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
         var result = await transactionService.DeleteTransactionAsync(id, userId);
+
         return StatusCode(result.StatusCode, result);
     }
 }
