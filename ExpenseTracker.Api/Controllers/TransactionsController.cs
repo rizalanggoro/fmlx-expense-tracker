@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseTracker.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class TransactionsController(
     ITransactionService transactionService,
@@ -17,7 +17,7 @@ public class TransactionsController(
     IValidator<UpdateTransactionDto> updateValidator
 ) : ControllerBase
 {
-    [HttpGet("~/api/v1/categories/{categoryId:guid}/transactions")]
+    [HttpGet("~/api/categories/{categoryId:guid}/transactions")]
     public async Task<IActionResult> GetTransactionsByCategory(
         Guid categoryId,
         [FromQuery] int pageIndex = 1,
@@ -44,7 +44,7 @@ public class TransactionsController(
         return StatusCode(result.StatusCode, result);
     }
 
-    [HttpPost("~/api/v1/categories/{categoryId:guid}/transactions")]
+    [HttpPost("~/api/categories/{categoryId:guid}/transactions")]
     public async Task<IActionResult> CreateTransaction(Guid categoryId, [FromBody] CreateTransactionDto request)
     {
         var validation = await createValidator.ValidateAsync(request);

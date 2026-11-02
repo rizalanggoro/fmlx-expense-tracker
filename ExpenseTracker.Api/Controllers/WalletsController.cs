@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseTracker.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class WalletsController(
     IWalletService walletService,

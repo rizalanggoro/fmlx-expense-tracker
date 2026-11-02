@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseTracker.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class CategoriesController(
     ICategoryService categoryService,
@@ -17,7 +17,7 @@ public class CategoriesController(
     IValidator<UpdateCategoryDto> updateValidator
 ) : ControllerBase
 {
-    [HttpGet("~/api/v1/wallets/{walletId:guid}/categories")]
+    [HttpGet("~/api/wallets/{walletId:guid}/categories")]
     public async Task<IActionResult> GetCategoriesByWallet(Guid walletId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -37,7 +37,7 @@ public class CategoriesController(
         return StatusCode(result.StatusCode, result);
     }
 
-    [HttpPost("~/api/v1/wallets/{walletId:guid}/categories")]
+    [HttpPost("~/api/wallets/{walletId:guid}/categories")]
     public async Task<IActionResult> CreateCategory(Guid walletId, [FromBody] CreateCategoryDto request)
     {
         var validation = await createValidator.ValidateAsync(request);

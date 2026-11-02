@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseTracker.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 public class AuthController(
     IAuthService authService,
     IValidator<RegisterRequestDto> registerValidator,
