@@ -91,7 +91,13 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 // 6. AutoMapper
-builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<AuthMappingProfile>();
+    cfg.AddProfile<WalletMappingProfile>();
+    cfg.AddProfile<CategoryMappingProfile>();
+    cfg.AddProfile<TransactionMappingProfile>();
+});
 
 // 7. FluentValidation
 builder.Services.AddScoped<IValidator<RegisterRequestDto>, RegisterRequestValidator>();
