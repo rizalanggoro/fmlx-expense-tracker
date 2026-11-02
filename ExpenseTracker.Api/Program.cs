@@ -18,11 +18,11 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database Connection (SQLite)
+// 1. Database Connection (PostgreSQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Data Source=expensetracker.db";
+    ?? "Host=localhost;Port=5432;Database=fmlx-expense-tracker;Username=postgres;Password=";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseNpgsql(connectionString));
 
 // 2. Microsoft Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
