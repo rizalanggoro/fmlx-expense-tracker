@@ -5,7 +5,6 @@ namespace ExpenseTracker.Api.Repositories.Interfaces;
 public interface ICategoryRepository
 {
     Task<IReadOnlyList<Category>> GetCategoriesAsync(string userId, Guid? walletId = null);
-    Task<IReadOnlyList<Category>> GetCategoriesByWalletIdAsync(Guid walletId);
     Task<Category?> GetCategoryWithWalletAsync(Guid categoryId);
     Task<bool> CategoryBelongsToUserAsync(Guid categoryId, string userId);
     Task<Category> AddAsync(Category category);

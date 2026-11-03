@@ -2,13 +2,17 @@ namespace ExpenseTracker.Api.Common;
 
 public class ServiceResult<T>
 {
-    public bool IsSuccess { get; set; }
-    public T? Data { get; set; }
-    public string? Message { get; set; }
-    public List<string>? Errors { get; set; }
-    public int StatusCode { get; set; }
+    public bool IsSuccess { get; private init; }
+    public T? Data { get; private init; }
+    public string? Message { get; private init; }
+    public List<string>? Errors { get; private init; }
+    public int StatusCode { get; private init; }
 
-    public static ServiceResult<T> Success(T data, string? message = null, int statusCode = 200)
+    public static ServiceResult<T> Success(
+        T data,
+        string? message = null,
+        int statusCode = 200
+    )
     {
         return new ServiceResult<T>
         {
@@ -20,7 +24,11 @@ public class ServiceResult<T>
         };
     }
 
-    public static ServiceResult<T> Failure(string message, List<string>? errors = null, int statusCode = 400)
+    public static ServiceResult<T> Failure(
+        string message,
+        int statusCode = 400,
+        List<string>? errors = null
+    )
     {
         return new ServiceResult<T>
         {
@@ -31,15 +39,4 @@ public class ServiceResult<T>
             StatusCode = statusCode
         };
     }
-
-    public static ServiceResult<T> NotFound(string message = "Resource not found")
-    {
-        return Failure(message, null, 404);
-    }
-
-    public static ServiceResult<T> Forbidden(string message = "You do not have permission to access this resource")
-    {
-        return Failure(message, null, 403);
-    }
 }
-

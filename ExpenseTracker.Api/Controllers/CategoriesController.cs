@@ -18,7 +18,10 @@ public class CategoriesController(
 ) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto request)
+    [ProducesResponseType(typeof(CategoryResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<CategoryResponseDto>> CreateCategory([FromBody] CreateCategoryDto request)
     {
         var validation = await createValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -28,7 +31,7 @@ public class CategoriesController(
                 .ToList();
 
             return BadRequest(
-                ServiceResult<object>.Failure(
+                new ErrorResponse(
                     "Validation failed",
                     errors
                 )
@@ -40,36 +43,73 @@ public class CategoriesController(
             return Unauthorized();
 
         var result = await categoryService.CreateCategoryAsync(userId, request);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to create category",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return CreatedAtAction(
+            nameof(GetCategoryById),
+            new { id = result.Data!.Id },
+            result.Data
+        );
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetCategories([FromQuery] Guid? walletId = null)
+    [ProducesResponseType(typeof(IEnumerable<CategoryResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IEnumerable<CategoryResponseDto>>> GetCategories([FromQuery] Guid? walletId = null)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
         var result = await categoryService.GetCategoriesAsync(userId, walletId);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to retrieve categories",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetCategoryById(Guid id)
+    [ProducesResponseType(typeof(CategoryResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CategoryResponseDto>> GetCategoryById(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
         var result = await categoryService.GetCategoryByIdAsync(id, userId);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Category not found",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] UpdateCategoryDto request)
+    [ProducesResponseType(typeof(CategoryResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CategoryResponseDto>> UpdateCategory(Guid id, [FromBody] UpdateCategoryDto request)
     {
         var validation = await updateValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -79,7 +119,7 @@ public class CategoriesController(
                 .ToList();
 
             return BadRequest(
-                ServiceResult<object>.Failure(
+                new ErrorResponse(
                     "Validation failed",
                     errors
                 )
@@ -91,11 +131,22 @@ public class CategoriesController(
             return Unauthorized();
 
         var result = await categoryService.UpdateCategoryAsync(id, userId, request);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to update category",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCategory(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -103,7 +154,15 @@ public class CategoriesController(
             return Unauthorized();
 
         var result = await categoryService.DeleteCategoryAsync(id, userId);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to delete category",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return NoContent();
     }
 }

@@ -18,7 +18,10 @@ public class TransactionsController(
 ) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionDto request)
+    [ProducesResponseType(typeof(TransactionResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<TransactionResponseDto>> CreateTransaction([FromBody] CreateTransactionDto request)
     {
         var validation = await createValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -28,7 +31,7 @@ public class TransactionsController(
                 .ToList();
 
             return BadRequest(
-                ServiceResult<object>.Failure(
+                new ErrorResponse(
                     "Validation failed",
                     errors
                 )
@@ -40,12 +43,26 @@ public class TransactionsController(
             return Unauthorized();
 
         var result = await transactionService.CreateTransactionAsync(userId, request);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to create transaction",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return CreatedAtAction(
+            nameof(GetTransactionById),
+            new { id = result.Data!.Id },
+            result.Data
+        );
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTransactions(
+    [ProducesResponseType(typeof(PagedResult<TransactionResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PagedResult<TransactionResponseDto>>> GetTransactions(
         [FromQuery] Guid? categoryId = null,
         [FromQuery] int pageIndex = 1,
         [FromQuery] int pageSize = 20,
@@ -66,23 +83,48 @@ public class TransactionsController(
             endDate
         );
 
-        return StatusCode(result.StatusCode, result);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to retrieve transactions",
+                    result.Errors
+                )
+            );
+
+        return Ok(result.Data);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetTransactionById(Guid id)
+    [ProducesResponseType(typeof(TransactionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TransactionResponseDto>> GetTransactionById(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await transactionService.GetTransactionByIdAsync(id, userId);
+        var result = await transactionService.GetTransactionByIdAsync(userId, id);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Transaction not found",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionDto request)
+    [ProducesResponseType(typeof(TransactionResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TransactionResponseDto>> UpdateTransaction(Guid id,
+        [FromBody] UpdateTransactionDto request)
     {
         var validation = await updateValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -92,7 +134,7 @@ public class TransactionsController(
                 .ToList();
 
             return BadRequest(
-                ServiceResult<object>.Failure(
+                new ErrorResponse(
                     "Validation failed",
                     errors
                 )
@@ -103,20 +145,39 @@ public class TransactionsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await transactionService.UpdateTransactionAsync(id, userId, request);
+        var result = await transactionService.UpdateTransactionAsync(userId, id, request);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to update transaction",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTransaction(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await transactionService.DeleteTransactionAsync(id, userId);
+        var result = await transactionService.DeleteTransactionAsync(userId, id);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to delete transaction",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return NoContent();
     }
 }

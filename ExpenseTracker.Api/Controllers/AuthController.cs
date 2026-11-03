@@ -18,7 +18,9 @@ public class AuthController(
 {
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterRequestDto request)
     {
         var validation = await registerValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -28,7 +30,7 @@ public class AuthController(
                 .ToList();
 
             return BadRequest(
-                ServiceResult<object>.Failure(
+                new ErrorResponse(
                     "Validation failed",
                     errors
                 )
@@ -36,13 +38,24 @@ public class AuthController(
         }
 
         var result = await authService.RegisterAsync(request);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Registration failed",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginRequestDto request)
     {
         var validation = await loginValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -52,7 +65,7 @@ public class AuthController(
                 .ToList();
 
             return BadRequest(
-                ServiceResult<object>.Failure(
+                new ErrorResponse(
                     "Validation failed",
                     errors
                 )
@@ -60,20 +73,39 @@ public class AuthController(
         }
 
         var result = await authService.LoginAsync(request);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Login failed",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpGet("me")]
     [Authorize]
-    public async Task<IActionResult> GetCurrentUser()
+    [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResponseDto>> GetCurrentUser()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
         var result = await authService.GetCurrentUserAsync(userId);
+        if (!result.IsSuccess)
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "User not found",
+                    result.Errors
+                )
+            );
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 }

@@ -17,14 +17,16 @@ public class CategoryService(
     {
         var walletExists = await walletRepository.ExistsAsync(request.WalletId, userId);
         if (!walletExists)
-            return ServiceResult<CategoryResponseDto>.NotFound("Wallet not found.");
+            return ServiceResult<CategoryResponseDto>.Failure(
+                "Wallet not found.",
+                404
+            );
 
         var category = mapper.Map<Category>(request);
         category.Id = Guid.NewGuid();
         category.CreatedAtUtc = DateTime.UtcNow;
 
         await categoryRepository.AddAsync(category);
-
         var response = mapper.Map<CategoryResponseDto>(category);
 
         return ServiceResult<CategoryResponseDto>.Success(
@@ -41,7 +43,10 @@ public class CategoryService(
         {
             var walletExists = await walletRepository.ExistsAsync(walletId.Value, userId);
             if (!walletExists)
-                return ServiceResult<IReadOnlyList<CategoryResponseDto>>.NotFound("Wallet not found.");
+                return ServiceResult<IReadOnlyList<CategoryResponseDto>>.Failure(
+                    "Wallet not found.",
+                    404
+                );
         }
 
         var categories = await categoryRepository.GetCategoriesAsync(userId, walletId);
@@ -54,7 +59,10 @@ public class CategoryService(
     {
         var category = await categoryRepository.GetCategoryWithWalletAsync(categoryId);
         if (category == null || category.Wallet.UserId != userId)
-            return ServiceResult<CategoryResponseDto>.NotFound("Category not found.");
+            return ServiceResult<CategoryResponseDto>.Failure(
+                "Category not found.",
+                404
+            );
 
         var response = mapper.Map<CategoryResponseDto>(category);
 
@@ -66,7 +74,10 @@ public class CategoryService(
     {
         var category = await categoryRepository.GetCategoryWithWalletAsync(categoryId);
         if (category == null || category.Wallet.UserId != userId)
-            return ServiceResult<CategoryResponseDto>.NotFound("Category not found.");
+            return ServiceResult<CategoryResponseDto>.Failure(
+                "Category not found.",
+                404
+            );
 
         mapper.Map(request, category);
         category.UpdatedAtUtc = DateTime.UtcNow;
@@ -85,7 +96,10 @@ public class CategoryService(
     {
         var category = await categoryRepository.GetCategoryWithWalletAsync(categoryId);
         if (category == null || category.Wallet.UserId != userId)
-            return ServiceResult<bool>.NotFound("Category not found.");
+            return ServiceResult<bool>.Failure(
+                "Category not found.",
+                404
+            );
 
         await categoryRepository.DeleteAsync(category);
 

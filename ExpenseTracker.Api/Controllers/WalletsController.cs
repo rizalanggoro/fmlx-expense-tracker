@@ -18,7 +18,10 @@ public class WalletsController(
 ) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateWallet([FromBody] CreateWalletDto request)
+    [ProducesResponseType(typeof(WalletResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<WalletResponseDto>> CreateWallet([FromBody] CreateWalletDto request)
     {
         var validation = await createValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -27,12 +30,7 @@ public class WalletsController(
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return BadRequest(
-                ServiceResult<object>.Failure(
-                    "Validation failed",
-                    errors
-                )
-            );
+            return BadRequest(new ErrorResponse("Validation failed", errors));
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -40,36 +38,57 @@ public class WalletsController(
             return Unauthorized();
 
         var result = await walletService.CreateWalletAsync(userId, request);
+        if (!result.IsSuccess)
+        {
+            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to create wallet", result.Errors));
+        }
 
-        return StatusCode(result.StatusCode, result);
+        return CreatedAtAction(nameof(GetWalletById), new { id = result.Data!.Id }, result.Data);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetWallets()
+    [ProducesResponseType(typeof(IEnumerable<WalletResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IEnumerable<WalletResponseDto>>> GetWallets()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
         var result = await walletService.GetWalletsAsync(userId);
+        if (!result.IsSuccess)
+        {
+            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to retrieve wallets", result.Errors));
+        }
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetWalletById(Guid id)
+    [ProducesResponseType(typeof(WalletResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<WalletResponseDto>> GetWalletById(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
         var result = await walletService.GetWalletByIdAsync(id, userId);
+        if (!result.IsSuccess)
+        {
+            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Wallet not found", result.Errors));
+        }
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateWallet(Guid id, [FromBody] UpdateWalletDto request)
+    [ProducesResponseType(typeof(WalletResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<WalletResponseDto>> UpdateWallet(Guid id, [FromBody] UpdateWalletDto request)
     {
         var validation = await updateValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -78,12 +97,7 @@ public class WalletsController(
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return BadRequest(
-                ServiceResult<object>.Failure(
-                    "Validation failed",
-                    errors
-                )
-            );
+            return BadRequest(new ErrorResponse("Validation failed", errors));
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -91,11 +105,18 @@ public class WalletsController(
             return Unauthorized();
 
         var result = await walletService.UpdateWalletAsync(id, userId, request);
+        if (!result.IsSuccess)
+        {
+            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to update wallet", result.Errors));
+        }
 
-        return StatusCode(result.StatusCode, result);
+        return Ok(result.Data);
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteWallet(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -103,7 +124,11 @@ public class WalletsController(
             return Unauthorized();
 
         var result = await walletService.DeleteWalletAsync(id, userId);
+        if (!result.IsSuccess)
+        {
+            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to delete wallet", result.Errors));
+        }
 
-        return StatusCode(result.StatusCode, result);
+        return NoContent();
     }
 }

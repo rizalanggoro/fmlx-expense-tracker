@@ -13,18 +13,23 @@ public class TransactionService(
     IMapper mapper
 ) : ITransactionService
 {
-    public async Task<ServiceResult<TransactionResponseDto>> CreateTransactionAsync(string userId,
-        CreateTransactionDto request)
+    public async Task<ServiceResult<TransactionResponseDto>> CreateTransactionAsync(
+        string userId,
+        CreateTransactionDto request
+    )
     {
         var category = await categoryRepository.GetCategoryWithWalletAsync(request.CategoryId);
         if (category == null || category.Wallet.UserId != userId)
-            return ServiceResult<TransactionResponseDto>.NotFound("Category not found.");
+            return ServiceResult<TransactionResponseDto>.Failure(
+                "Category not found.",
+                404
+            );
 
         var transaction = mapper.Map<Transaction>(request);
         transaction.Id = Guid.NewGuid();
         transaction.CreatedAtUtc = DateTime.UtcNow;
 
-        await transactionRepository.AddAsync(transaction);
+        await transactionRepository.CreateAsync(transaction);
 
         // Assign navigation category for mapper response
         transaction.Category = category;
@@ -51,10 +56,13 @@ public class TransactionService(
         {
             var categoryBelongs = await categoryRepository.CategoryBelongsToUserAsync(categoryId.Value, userId);
             if (!categoryBelongs)
-                return ServiceResult<PagedResult<TransactionResponseDto>>.NotFound("Category not found.");
+                return ServiceResult<PagedResult<TransactionResponseDto>>.Failure(
+                    "Category not found.",
+                    404
+                );
         }
 
-        var (items, totalCount) = await transactionRepository.GetPagedTransactionsAsync(
+        var (items, totalCount) = await transactionRepository.GetAllPagedAsync(
             userId,
             categoryId,
             pageIndex,
@@ -64,28 +72,45 @@ public class TransactionService(
         );
 
         var mappedItems = mapper.Map<IReadOnlyList<TransactionResponseDto>>(items);
-        var pagedResult = new PagedResult<TransactionResponseDto>(mappedItems, totalCount, pageIndex, pageSize);
+        var pagedResult = new PagedResult<TransactionResponseDto>(
+            mappedItems,
+            totalCount,
+            pageIndex,
+            pageSize
+        );
 
         return ServiceResult<PagedResult<TransactionResponseDto>>.Success(pagedResult);
     }
 
-    public async Task<ServiceResult<TransactionResponseDto>> GetTransactionByIdAsync(Guid transactionId, string userId)
+    public async Task<ServiceResult<TransactionResponseDto>> GetTransactionByIdAsync(
+        string userId,
+        Guid transactionId
+    )
     {
-        var transaction = await transactionRepository.GetTransactionWithCategoryAndWalletAsync(transactionId);
-        if (transaction == null || transaction.Category.Wallet.UserId != userId)
-            return ServiceResult<TransactionResponseDto>.NotFound("Transaction not found.");
+        var transaction = await transactionRepository.GetByIdAsync(userId, transactionId);
+        if (transaction == null)
+            return ServiceResult<TransactionResponseDto>.Failure(
+                "Transaction not found.",
+                404
+            );
 
         var response = mapper.Map<TransactionResponseDto>(transaction);
 
         return ServiceResult<TransactionResponseDto>.Success(response);
     }
 
-    public async Task<ServiceResult<TransactionResponseDto>> UpdateTransactionAsync(Guid transactionId, string userId,
-        UpdateTransactionDto request)
+    public async Task<ServiceResult<TransactionResponseDto>> UpdateTransactionAsync(
+        string userId,
+        Guid transactionId,
+        UpdateTransactionDto request
+    )
     {
-        var transaction = await transactionRepository.GetTransactionWithCategoryAndWalletAsync(transactionId);
-        if (transaction == null || transaction.Category.Wallet.UserId != userId)
-            return ServiceResult<TransactionResponseDto>.NotFound("Transaction not found.");
+        var transaction = await transactionRepository.GetByIdAsync(userId, transactionId);
+        if (transaction == null)
+            return ServiceResult<TransactionResponseDto>.Failure(
+                "Transaction not found.",
+                404
+            );
 
         mapper.Map(request, transaction);
         transaction.UpdatedAtUtc = DateTime.UtcNow;
@@ -94,14 +119,20 @@ public class TransactionService(
 
         var response = mapper.Map<TransactionResponseDto>(transaction);
 
-        return ServiceResult<TransactionResponseDto>.Success(response, "Transaction updated successfully.");
+        return ServiceResult<TransactionResponseDto>.Success(
+            response,
+            "Transaction updated successfully."
+        );
     }
 
-    public async Task<ServiceResult<bool>> DeleteTransactionAsync(Guid transactionId, string userId)
+    public async Task<ServiceResult<bool>> DeleteTransactionAsync(string userId, Guid transactionId)
     {
-        var transaction = await transactionRepository.GetTransactionWithCategoryAndWalletAsync(transactionId);
-        if (transaction == null || transaction.Category.Wallet.UserId != userId)
-            return ServiceResult<bool>.NotFound("Transaction not found.");
+        var transaction = await transactionRepository.GetByIdAsync(userId, transactionId);
+        if (transaction == null)
+            return ServiceResult<bool>.Failure(
+                "Transaction not found.",
+                404
+            );
 
         await transactionRepository.DeleteAsync(transaction);
 

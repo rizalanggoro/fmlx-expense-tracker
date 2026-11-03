@@ -1,5 +1,6 @@
 using System.Text;
 using dotenv.net;
+using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Domain.Entities;
 using ExpenseTracker.Api.DTOs.Auth;
@@ -70,6 +71,27 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
             ClockSkew = TimeSpan.Zero
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+
+                var response = new ErrorResponse("Unauthorized. Token is missing or invalid.");
+                await context.Response.WriteAsJsonAsync(response);
+            },
+            OnForbidden = async context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json";
+
+                var response = new ErrorResponse("Forbidden. You do not have permission to access this resource.");
+                await context.Response.WriteAsJsonAsync(response);
+            }
         };
     });
 

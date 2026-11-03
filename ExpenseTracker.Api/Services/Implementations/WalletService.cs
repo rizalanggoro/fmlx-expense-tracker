@@ -24,7 +24,7 @@ public class WalletService(
     {
         var wallet = await walletRepository.GetWalletWithDetailsAsync(walletId, userId);
         if (wallet == null)
-            return ServiceResult<WalletDetailResponseDto>.NotFound("Wallet not found.");
+            return ServiceResult<WalletDetailResponseDto>.Failure("Wallet not found.", 404);
 
         var response = mapper.Map<WalletDetailResponseDto>(wallet);
 
@@ -54,7 +54,7 @@ public class WalletService(
     {
         var wallet = await walletRepository.GetWalletWithDetailsAsync(walletId, userId);
         if (wallet == null)
-            return ServiceResult<WalletResponseDto>.NotFound("Wallet not found.");
+            return ServiceResult<WalletResponseDto>.Failure("Wallet not found.", 404);
 
         mapper.Map(request, wallet);
         wallet.UpdatedAtUtc = DateTime.UtcNow;
@@ -73,7 +73,7 @@ public class WalletService(
     {
         var wallet = await walletRepository.GetWalletWithDetailsAsync(walletId, userId);
         if (wallet == null)
-            return ServiceResult<bool>.NotFound("Wallet not found.");
+            return ServiceResult<bool>.Failure("Wallet not found.", 404);
 
         await walletRepository.DeleteAsync(wallet);
 

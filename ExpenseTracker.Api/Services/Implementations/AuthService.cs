@@ -46,6 +46,7 @@ public class AuthService(
 
             return ServiceResult<AuthResponseDto>.Failure(
                 "Registration failed.",
+                400,
                 errors
             );
         }
@@ -107,7 +108,7 @@ public class AuthService(
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
-            return ServiceResult<UserResponseDto>.NotFound("User not found.");
+            return ServiceResult<UserResponseDto>.Failure("User not found.", 404);
 
         var userDto = mapper.Map<UserResponseDto>(user);
 

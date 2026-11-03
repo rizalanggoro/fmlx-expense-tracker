@@ -9,4 +9,3 @@ public interface IAuthService
     Task<ServiceResult<AuthResponseDto>> LoginAsync(LoginRequestDto request);
     Task<ServiceResult<UserResponseDto>> GetCurrentUserAsync(string userId);
 }
-
