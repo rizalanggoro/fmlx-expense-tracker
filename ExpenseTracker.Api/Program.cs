@@ -1,6 +1,5 @@
 using System.Text;
 using dotenv.net;
-using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Domain.Entities;
 using ExpenseTracker.Api.DTOs.Auth;
@@ -17,16 +16,14 @@ using ExpenseTracker.Api.Validators.Categories;
 using ExpenseTracker.Api.Validators.Transactions;
 using ExpenseTracker.Api.Validators.Wallets;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 // Load environment variables from .env file
-DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
+DotEnv.Load(new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,16 +34,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // 2. Microsoft Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
-    options.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 6;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 // 3. JWT Authentication (from environment)
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")!;
@@ -54,27 +51,27 @@ var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!;
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!;
 
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-        ClockSkew = TimeSpan.Zero
-    };
-});
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 builder.Services.AddAuthorization();
 
@@ -127,10 +124,10 @@ builder.Services.AddSwaggerGen(options =>
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
+        Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter JWT Bearer token format: Bearer {your token}"
+        Description = "Enter your JWT token directly (without the 'Bearer ' prefix). Swagger UI will automatically prepend 'Bearer '."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -156,9 +153,13 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExpenseTracker API v1");
-    });
+        {
+            c.SwaggerEndpoint(
+                "/swagger/v1/swagger.json",
+                "ExpenseTracker API v1"
+            );
+        }
+    );
 }
 
 app.UseHttpsRedirection();

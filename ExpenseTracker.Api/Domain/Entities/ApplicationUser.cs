@@ -4,10 +4,9 @@ namespace ExpenseTracker.Api.Domain.Entities;
 
 public class ApplicationUser : IdentityUser
 {
-    public string? FullName { get; set; }
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? FullName { get; init; }
+    public DateTime CreatedAtUtc { get; init; } = DateTime.UtcNow;
 
     // Navigation property
-    public ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
+    public ICollection<Wallet> Wallets { get; init; } = new List<Wallet>();
 }
-
