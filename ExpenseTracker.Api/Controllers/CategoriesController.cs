@@ -42,7 +42,7 @@ public class CategoriesController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await categoryService.CreateCategoryAsync(userId, request);
+        var result = await categoryService.CreateAsync(userId, request);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -68,7 +68,7 @@ public class CategoriesController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await categoryService.GetCategoriesAsync(userId, walletId);
+        var result = await categoryService.GetAllAsync(userId, walletId);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -91,7 +91,7 @@ public class CategoriesController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await categoryService.GetCategoryByIdAsync(id, userId);
+        var result = await categoryService.GetAsync(userId, id);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -130,7 +130,7 @@ public class CategoriesController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await categoryService.UpdateCategoryAsync(id, userId, request);
+        var result = await categoryService.UpdateAsync(userId, id, request);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -153,7 +153,7 @@ public class CategoriesController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await categoryService.DeleteCategoryAsync(id, userId);
+        var result = await categoryService.DeleteAsync(userId, id);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,

@@ -13,7 +13,7 @@ public class CategoryService(
     IMapper mapper
 ) : ICategoryService
 {
-    public async Task<ServiceResult<CategoryResponseDto>> CreateCategoryAsync(string userId, CreateCategoryDto request)
+    public async Task<ServiceResult<CategoryResponseDto>> CreateAsync(string userId, CreateCategoryDto request)
     {
         var wallet = await walletRepository.GetAsync(userId, request.WalletId);
         if (wallet == null)
@@ -26,7 +26,7 @@ public class CategoryService(
         category.Id = Guid.NewGuid();
         category.CreatedAtUtc = DateTime.UtcNow;
 
-        await categoryRepository.AddAsync(category);
+        await categoryRepository.CreateAsync(category);
         var response = mapper.Map<CategoryResponseDto>(category);
 
         return ServiceResult<CategoryResponseDto>.Success(
@@ -36,7 +36,7 @@ public class CategoryService(
         );
     }
 
-    public async Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetCategoriesAsync(string userId,
+    public async Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetAllAsync(string userId,
         Guid? walletId = null)
     {
         if (walletId.HasValue)
@@ -49,16 +49,16 @@ public class CategoryService(
                 );
         }
 
-        var categories = await categoryRepository.GetCategoriesAsync(userId, walletId);
+        var categories = await categoryRepository.GetAllAsync(userId, walletId);
         var response = mapper.Map<IReadOnlyList<CategoryResponseDto>>(categories);
 
         return ServiceResult<IReadOnlyList<CategoryResponseDto>>.Success(response);
     }
 
-    public async Task<ServiceResult<CategoryResponseDto>> GetCategoryByIdAsync(Guid categoryId, string userId)
+    public async Task<ServiceResult<CategoryResponseDto>> GetAsync(string userId, Guid categoryId)
     {
-        var category = await categoryRepository.GetCategoryWithWalletAsync(categoryId);
-        if (category == null || category.Wallet.UserId != userId)
+        var category = await categoryRepository.GetAsync(userId, categoryId);
+        if (category == null)
             return ServiceResult<CategoryResponseDto>.Failure(
                 "Category not found.",
                 404
@@ -69,11 +69,11 @@ public class CategoryService(
         return ServiceResult<CategoryResponseDto>.Success(response);
     }
 
-    public async Task<ServiceResult<CategoryResponseDto>> UpdateCategoryAsync(Guid categoryId, string userId,
+    public async Task<ServiceResult<CategoryResponseDto>> UpdateAsync(string userId, Guid categoryId,
         UpdateCategoryDto request)
     {
-        var category = await categoryRepository.GetCategoryWithWalletAsync(categoryId);
-        if (category == null || category.Wallet.UserId != userId)
+        var category = await categoryRepository.GetAsync(userId, categoryId);
+        if (category == null)
             return ServiceResult<CategoryResponseDto>.Failure(
                 "Category not found.",
                 404
@@ -92,10 +92,10 @@ public class CategoryService(
         );
     }
 
-    public async Task<ServiceResult<bool>> DeleteCategoryAsync(Guid categoryId, string userId)
+    public async Task<ServiceResult<bool>> DeleteAsync(string userId, Guid categoryId)
     {
-        var category = await categoryRepository.GetCategoryWithWalletAsync(categoryId);
-        if (category == null || category.Wallet.UserId != userId)
+        var category = await categoryRepository.GetAsync(userId, categoryId);
+        if (category == null)
             return ServiceResult<bool>.Failure(
                 "Category not found.",
                 404

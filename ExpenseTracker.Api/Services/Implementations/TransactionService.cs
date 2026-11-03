@@ -18,8 +18,8 @@ public class TransactionService(
         CreateTransactionDto request
     )
     {
-        var category = await categoryRepository.GetCategoryWithWalletAsync(request.CategoryId);
-        if (category == null || category.Wallet.UserId != userId)
+        var category = await categoryRepository.GetAsync(userId, request.CategoryId);
+        if (category == null)
             return ServiceResult<TransactionResponseDto>.Failure(
                 "Category not found.",
                 404
@@ -54,8 +54,8 @@ public class TransactionService(
     {
         if (categoryId.HasValue)
         {
-            var categoryBelongs = await categoryRepository.CategoryBelongsToUserAsync(categoryId.Value, userId);
-            if (!categoryBelongs)
+            var category = await categoryRepository.GetAsync(userId, categoryId.Value);
+            if (category == null)
                 return ServiceResult<PagedResult<TransactionResponseDto>>.Failure(
                     "Category not found.",
                     404

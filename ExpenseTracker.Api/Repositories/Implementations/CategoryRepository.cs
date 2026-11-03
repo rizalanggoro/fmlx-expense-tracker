@@ -9,7 +9,15 @@ public class CategoryRepository(
     ApplicationDbContext context
 ) : ICategoryRepository
 {
-    public async Task<IReadOnlyList<Category>> GetCategoriesAsync(string userId, Guid? walletId = null)
+    public async Task<Category> CreateAsync(Category category)
+    {
+        await context.Categories.AddAsync(category);
+        await context.SaveChangesAsync();
+
+        return category;
+    }
+
+    public async Task<IReadOnlyList<Category>> GetAllAsync(string userId, Guid? walletId = null)
     {
         var query = context.Categories
             .AsNoTracking()
@@ -24,26 +32,11 @@ public class CategoryRepository(
             .ToListAsync();
     }
 
-    public async Task<Category?> GetCategoryWithWalletAsync(Guid categoryId)
+    public async Task<Category?> GetAsync(string userId, Guid categoryId)
     {
         return await context.Categories
             .Include(c => c.Wallet)
-            .FirstOrDefaultAsync(c => c.Id == categoryId);
-    }
-
-    public async Task<bool> CategoryBelongsToUserAsync(Guid categoryId, string userId)
-    {
-        return await context.Categories
-            .AsNoTracking()
-            .AnyAsync(c => c.Id == categoryId && c.Wallet.UserId == userId);
-    }
-
-    public async Task<Category> AddAsync(Category category)
-    {
-        await context.Categories.AddAsync(category);
-        await context.SaveChangesAsync();
-
-        return category;
+            .FirstOrDefaultAsync(c => c.Id == categoryId && c.Wallet.UserId == userId);
     }
 
     public async Task UpdateAsync(Category category)
