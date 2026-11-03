@@ -2,8 +2,7 @@ using ExpenseTracker.Api.DTOs.Categories;
 
 namespace ExpenseTracker.Api.DTOs.Wallets;
 
-public class WalletDetailResponseDto : WalletResponseDto
+public record WalletDetailResponseDto : WalletResponseDto
 {
-    public IReadOnlyList<CategoryResponseDto> Categories { get; set; } = [];
+    public IReadOnlyList<CategoryResponseDto> Categories { get; init; } = [];
 }
-

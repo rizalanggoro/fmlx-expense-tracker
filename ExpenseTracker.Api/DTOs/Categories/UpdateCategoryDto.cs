@@ -2,9 +2,8 @@ using ExpenseTracker.Api.Domain.Enums;
 
 namespace ExpenseTracker.Api.DTOs.Categories;
 
-public class UpdateCategoryDto
+public record UpdateCategoryDto
 {
-    public string Name { get; set; } = string.Empty;
-    public CategoryType Type { get; set; }
+    public string Name { get; init; } = string.Empty;
+    public CategoryType Type { get; init; }
 }
-

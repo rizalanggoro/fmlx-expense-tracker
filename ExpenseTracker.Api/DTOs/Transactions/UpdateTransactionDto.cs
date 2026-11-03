@@ -1,9 +1,8 @@
 namespace ExpenseTracker.Api.DTOs.Transactions;
 
-public class UpdateTransactionDto
+public record UpdateTransactionDto
 {
-    public decimal Amount { get; set; }
-    public DateTime TransactionDate { get; set; }
-    public string? Description { get; set; }
+    public decimal Amount { get; init; }
+    public DateTime TransactionDate { get; init; }
+    public string? Description { get; init; }
 }
-

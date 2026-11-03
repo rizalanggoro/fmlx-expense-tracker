@@ -2,17 +2,16 @@ using ExpenseTracker.Api.Domain.Enums;
 
 namespace ExpenseTracker.Api.DTOs.Transactions;
 
-public class TransactionResponseDto
+public record TransactionResponseDto
 {
-    public Guid Id { get; set; }
-    public Guid CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public CategoryType CategoryType { get; set; }
+    public Guid Id { get; init; }
+    public Guid CategoryId { get; init; }
+    public string CategoryName { get; init; } = string.Empty;
+    public CategoryType CategoryType { get; init; }
     public string CategoryTypeName => CategoryType.ToString();
-    public decimal Amount { get; set; }
-    public DateTime TransactionDate { get; set; }
-    public string? Description { get; set; }
-    public DateTime CreatedAtUtc { get; set; }
-    public DateTime? UpdatedAtUtc { get; set; }
+    public decimal Amount { get; init; }
+    public DateTime TransactionDate { get; init; }
+    public string? Description { get; init; }
+    public DateTime CreatedAtUtc { get; init; }
+    public DateTime? UpdatedAtUtc { get; init; }
 }
-

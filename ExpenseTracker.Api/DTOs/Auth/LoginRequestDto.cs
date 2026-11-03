@@ -1,8 +1,7 @@
 namespace ExpenseTracker.Api.DTOs.Auth;
 
-public class LoginRequestDto
+public record LoginRequestDto
 {
-    public string EmailOrUserName { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
+    public string EmailOrUserName { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
 }
-

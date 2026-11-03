@@ -1,9 +1,8 @@
 namespace ExpenseTracker.Api.DTOs.Wallets;
 
-public class UpdateWalletDto
+public record UpdateWalletDto
 {
-    public string Name { get; set; } = string.Empty;
-    public string Currency { get; set; } = "IDR";
-    public string? Description { get; set; }
+    public string Name { get; init; } = string.Empty;
+    public string Currency { get; init; } = "IDR";
+    public string? Description { get; init; }
 }
-

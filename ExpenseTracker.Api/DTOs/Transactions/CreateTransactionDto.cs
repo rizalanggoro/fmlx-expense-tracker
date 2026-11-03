@@ -1,9 +1,9 @@
 namespace ExpenseTracker.Api.DTOs.Transactions;
 
-public class CreateTransactionDto
+public record CreateTransactionDto
 {
-    public Guid CategoryId { get; set; }
-    public decimal Amount { get; set; }
-    public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
-    public string? Description { get; set; }
+    public Guid CategoryId { get; init; }
+    public decimal Amount { get; init; }
+    public DateTime TransactionDate { get; init; } = DateTime.UtcNow;
+    public string? Description { get; init; }
 }

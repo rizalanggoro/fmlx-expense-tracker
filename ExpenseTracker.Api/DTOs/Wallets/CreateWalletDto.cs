@@ -1,10 +1,9 @@
 namespace ExpenseTracker.Api.DTOs.Wallets;
 
-public class CreateWalletDto
+public record CreateWalletDto
 {
-    public string Name { get; set; } = string.Empty;
-    public string Currency { get; set; } = "IDR";
-    public decimal InitialBalance { get; set; } = 0.00m;
-    public string? Description { get; set; }
+    public string Name { get; init; } = string.Empty;
+    public string Currency { get; init; } = "IDR";
+    public decimal InitialBalance { get; init; } = 0.00m;
+    public string? Description { get; init; }
 }
-
