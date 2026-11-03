@@ -62,7 +62,7 @@ public class TransactionService(
                 );
         }
 
-        var (items, totalCount) = await transactionRepository.GetAllPagedAsync(
+        var pagedTransactions = await transactionRepository.GetAllPagedAsync(
             userId,
             categoryId,
             pageIndex,
@@ -71,12 +71,12 @@ public class TransactionService(
             endDate
         );
 
-        var mappedItems = mapper.Map<IReadOnlyList<TransactionResponseDto>>(items);
+        var mappedItems = mapper.Map<IReadOnlyList<TransactionResponseDto>>(pagedTransactions.Items);
         var pagedResult = new PagedResult<TransactionResponseDto>(
             mappedItems,
-            totalCount,
-            pageIndex,
-            pageSize
+            pagedTransactions.TotalCount,
+            pagedTransactions.PageIndex,
+            pagedTransactions.PageSize
         );
 
         return ServiceResult<PagedResult<TransactionResponseDto>>.Success(pagedResult);

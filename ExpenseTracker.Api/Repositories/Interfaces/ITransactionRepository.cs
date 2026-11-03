@@ -1,3 +1,4 @@
+using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.Domain.Entities;
 
 namespace ExpenseTracker.Api.Repositories.Interfaces;
@@ -6,7 +7,7 @@ public interface ITransactionRepository
 {
     Task<Transaction> CreateAsync(Transaction transaction);
 
-    Task<(IReadOnlyList<Transaction> Items, int TotalCount)> GetAllPagedAsync(
+    Task<PagedResult<Transaction>> GetAllPagedAsync(
         string userId,
         Guid? categoryId = null,
         int pageIndex = 1,

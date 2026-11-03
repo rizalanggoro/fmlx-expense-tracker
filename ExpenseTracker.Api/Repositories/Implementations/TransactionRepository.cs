@@ -1,3 +1,4 @@
+using ExpenseTracker.Api.Common;
 using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Domain.Entities;
 using ExpenseTracker.Api.Repositories.Interfaces;
@@ -15,7 +16,7 @@ public class TransactionRepository(ApplicationDbContext context) : ITransactionR
         return transaction;
     }
 
-    public async Task<(IReadOnlyList<Transaction> Items, int TotalCount)> GetAllPagedAsync(
+    public async Task<PagedResult<Transaction>> GetAllPagedAsync(
         string userId,
         Guid? categoryId = null,
         int pageIndex = 1,
@@ -44,7 +45,7 @@ public class TransactionRepository(ApplicationDbContext context) : ITransactionR
             .Take(pageSize)
             .ToListAsync();
 
-        return (items, totalCount);
+        return new PagedResult<Transaction>(items, totalCount, pageIndex, pageSize);
     }
 
     public async Task<Transaction?> GetByIdAsync(string userId, Guid transactionId)
