@@ -4,9 +4,9 @@ namespace ExpenseTracker.Api.Repositories.Interfaces;
 
 public interface ICategoryRepository
 {
-    Task<Category> CreateAsync(Category category);
-    Task<IReadOnlyList<Category>> GetAllAsync(string userId, Guid? walletId = null);
-    Task<Category?> GetAsync(string userId, Guid categoryId);
-    Task UpdateAsync(Category category);
-    Task DeleteAsync(Category category);
+    Task<Category> CreateCategoryAsync(Category category);
+    Task<IReadOnlyList<Category>> GetCategoriesAsync(string userId, Guid? walletId = null);
+    Task<Category?> GetCategoryAsync(string userId, Guid categoryId);
+    Task UpdateCategoryAsync(Category category);
+    Task DeleteCategoryAsync(Category category);
 }

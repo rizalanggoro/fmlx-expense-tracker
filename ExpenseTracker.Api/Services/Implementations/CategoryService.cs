@@ -13,9 +13,9 @@ public class CategoryService(
     IMapper mapper
 ) : ICategoryService
 {
-    public async Task<ServiceResult<CategoryResponseDto>> CreateAsync(string userId, CreateCategoryDto request)
+    public async Task<ServiceResult<CategoryResponseDto>> CreateCategoryAsync(string userId, CreateCategoryDto request)
     {
-        var wallet = await walletRepository.GetAsync(userId, request.WalletId);
+        var wallet = await walletRepository.GetWalletAsync(userId, request.WalletId);
         if (wallet == null)
             return ServiceResult<CategoryResponseDto>.Failure(
                 "Wallet not found.",
@@ -26,7 +26,7 @@ public class CategoryService(
         category.Id = Guid.NewGuid();
         category.CreatedAtUtc = DateTime.UtcNow;
 
-        await categoryRepository.CreateAsync(category);
+        await categoryRepository.CreateCategoryAsync(category);
         var response = mapper.Map<CategoryResponseDto>(category);
 
         return ServiceResult<CategoryResponseDto>.Success(
@@ -36,12 +36,12 @@ public class CategoryService(
         );
     }
 
-    public async Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetAllAsync(string userId,
+    public async Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetCategoriesAsync(string userId,
         Guid? walletId = null)
     {
         if (walletId.HasValue)
         {
-            var wallet = await walletRepository.GetAsync(userId, walletId.Value);
+            var wallet = await walletRepository.GetWalletAsync(userId, walletId.Value);
             if (wallet == null)
                 return ServiceResult<IReadOnlyList<CategoryResponseDto>>.Failure(
                     "Wallet not found.",
@@ -49,15 +49,15 @@ public class CategoryService(
                 );
         }
 
-        var categories = await categoryRepository.GetAllAsync(userId, walletId);
+        var categories = await categoryRepository.GetCategoriesAsync(userId, walletId);
         var response = mapper.Map<IReadOnlyList<CategoryResponseDto>>(categories);
 
         return ServiceResult<IReadOnlyList<CategoryResponseDto>>.Success(response);
     }
 
-    public async Task<ServiceResult<CategoryResponseDto>> GetAsync(string userId, Guid categoryId)
+    public async Task<ServiceResult<CategoryResponseDto>> GetCategoryAsync(string userId, Guid categoryId)
     {
-        var category = await categoryRepository.GetAsync(userId, categoryId);
+        var category = await categoryRepository.GetCategoryAsync(userId, categoryId);
         if (category == null)
             return ServiceResult<CategoryResponseDto>.Failure(
                 "Category not found.",
@@ -69,10 +69,10 @@ public class CategoryService(
         return ServiceResult<CategoryResponseDto>.Success(response);
     }
 
-    public async Task<ServiceResult<CategoryResponseDto>> UpdateAsync(string userId, Guid categoryId,
+    public async Task<ServiceResult<CategoryResponseDto>> UpdateCategoryAsync(string userId, Guid categoryId,
         UpdateCategoryDto request)
     {
-        var category = await categoryRepository.GetAsync(userId, categoryId);
+        var category = await categoryRepository.GetCategoryAsync(userId, categoryId);
         if (category == null)
             return ServiceResult<CategoryResponseDto>.Failure(
                 "Category not found.",
@@ -82,7 +82,7 @@ public class CategoryService(
         mapper.Map(request, category);
         category.UpdatedAtUtc = DateTime.UtcNow;
 
-        await categoryRepository.UpdateAsync(category);
+        await categoryRepository.UpdateCategoryAsync(category);
 
         var response = mapper.Map<CategoryResponseDto>(category);
 
@@ -92,16 +92,16 @@ public class CategoryService(
         );
     }
 
-    public async Task<ServiceResult<bool>> DeleteAsync(string userId, Guid categoryId)
+    public async Task<ServiceResult<bool>> DeleteCategoryAsync(string userId, Guid categoryId)
     {
-        var category = await categoryRepository.GetAsync(userId, categoryId);
+        var category = await categoryRepository.GetCategoryAsync(userId, categoryId);
         if (category == null)
             return ServiceResult<bool>.Failure(
                 "Category not found.",
                 404
             );
 
-        await categoryRepository.DeleteAsync(category);
+        await categoryRepository.DeleteCategoryAsync(category);
 
         return ServiceResult<bool>.Success(
             true,

@@ -5,9 +5,9 @@ namespace ExpenseTracker.Api.Repositories.Interfaces;
 
 public interface ITransactionRepository
 {
-    Task<Transaction> CreateAsync(Transaction transaction);
+    Task<Transaction> CreateTransactionAsync(Transaction transaction);
 
-    Task<PagedResult<Transaction>> GetAllPagedAsync(
+    Task<PagedResult<Transaction>> GetPagedTransactionsAsync(
         string userId,
         Guid? categoryId = null,
         int pageIndex = 1,
@@ -16,7 +16,7 @@ public interface ITransactionRepository
         DateTime? endDate = null
     );
 
-    Task<Transaction?> GetByIdAsync(string userId, Guid transactionId);
-    Task UpdateAsync(Transaction transaction);
-    Task DeleteAsync(Transaction transaction);
+    Task<Transaction?> GetTransactionAsync(string userId, Guid transactionId);
+    Task UpdateTransactionAsync(Transaction transaction);
+    Task DeleteTransactionAsync(Transaction transaction);
 }

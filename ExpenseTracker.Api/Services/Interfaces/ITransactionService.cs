@@ -19,7 +19,7 @@ public interface ITransactionService
         DateTime? endDate = null
     );
 
-    Task<ServiceResult<TransactionResponseDto>> GetTransactionByIdAsync(
+    Task<ServiceResult<TransactionResponseDto>> GetTransactionAsync(
         string userId,
         Guid transactionId
     );

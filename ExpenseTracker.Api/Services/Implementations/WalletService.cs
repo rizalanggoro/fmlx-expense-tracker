@@ -12,7 +12,7 @@ public class WalletService(
     IMapper mapper
 ) : IWalletService
 {
-    public async Task<ServiceResult<WalletResponseDto>> CreateAsync(
+    public async Task<ServiceResult<WalletResponseDto>> CreateWalletAsync(
         string userId,
         CreateWalletDto request
     )
@@ -22,7 +22,7 @@ public class WalletService(
         wallet.UserId = userId;
         wallet.CreatedAtUtc = DateTime.UtcNow;
 
-        await walletRepository.CreateAsync(wallet);
+        await walletRepository.CreateWalletAsync(wallet);
         var response = mapper.Map<WalletResponseDto>(wallet);
 
         return ServiceResult<WalletResponseDto>.Success(
@@ -32,22 +32,22 @@ public class WalletService(
         );
     }
 
-    public async Task<ServiceResult<IReadOnlyList<WalletResponseDto>>> GetAllAsync(
+    public async Task<ServiceResult<IReadOnlyList<WalletResponseDto>>> GetWalletsAsync(
         string userId
     )
     {
-        var wallets = await walletRepository.GetAllAsync(userId);
+        var wallets = await walletRepository.GetWalletsAsync(userId);
         var response = mapper.Map<IReadOnlyList<WalletResponseDto>>(wallets);
 
         return ServiceResult<IReadOnlyList<WalletResponseDto>>.Success(response);
     }
 
-    public async Task<ServiceResult<WalletDetailResponseDto>> GetAsync(
+    public async Task<ServiceResult<WalletDetailResponseDto>> GetWalletAsync(
         string userId,
         Guid walletId
     )
     {
-        var wallet = await walletRepository.GetWithDetailsAsync(userId, walletId);
+        var wallet = await walletRepository.GetWalletWithDetailsAsync(userId, walletId);
         if (wallet == null)
             return ServiceResult<WalletDetailResponseDto>.Failure(
                 "Wallet not found.",
@@ -59,13 +59,13 @@ public class WalletService(
         return ServiceResult<WalletDetailResponseDto>.Success(response);
     }
 
-    public async Task<ServiceResult<WalletResponseDto>> UpdateAsync(
+    public async Task<ServiceResult<WalletResponseDto>> UpdateWalletAsync(
         string userId,
         Guid walletId,
         UpdateWalletDto request
     )
     {
-        var wallet = await walletRepository.GetAsync(userId, walletId);
+        var wallet = await walletRepository.GetWalletAsync(userId, walletId);
         if (wallet == null)
             return ServiceResult<WalletResponseDto>.Failure(
                 "Wallet not found.",
@@ -75,7 +75,7 @@ public class WalletService(
         mapper.Map(request, wallet);
         wallet.UpdatedAtUtc = DateTime.UtcNow;
 
-        await walletRepository.UpdateAsync(wallet);
+        await walletRepository.UpdateWalletAsync(wallet);
         var response = mapper.Map<WalletResponseDto>(wallet);
 
         return ServiceResult<WalletResponseDto>.Success(
@@ -84,16 +84,16 @@ public class WalletService(
         );
     }
 
-    public async Task<ServiceResult<bool>> DeleteAsync(string userId, Guid walletId)
+    public async Task<ServiceResult<bool>> DeleteWalletAsync(string userId, Guid walletId)
     {
-        var wallet = await walletRepository.GetAsync(userId, walletId);
+        var wallet = await walletRepository.GetWalletAsync(userId, walletId);
         if (wallet == null)
             return ServiceResult<bool>.Failure(
                 "Wallet not found.",
                 404
             );
 
-        await walletRepository.DeleteAsync(wallet);
+        await walletRepository.DeleteWalletAsync(wallet);
 
         return ServiceResult<bool>.Success(
             true,

@@ -42,7 +42,7 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.CreateAsync(userId, request);
+        var result = await walletService.CreateWalletAsync(userId, request);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -68,7 +68,7 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.GetAllAsync(userId);
+        var result = await walletService.GetWalletsAsync(userId);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -91,7 +91,7 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.GetAsync(userId, id);
+        var result = await walletService.GetWalletAsync(userId, id);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -130,7 +130,7 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.UpdateAsync(userId, id, request);
+        var result = await walletService.UpdateWalletAsync(userId, id, request);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,
@@ -153,7 +153,7 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.DeleteAsync(userId, id);
+        var result = await walletService.DeleteWalletAsync(userId, id);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,

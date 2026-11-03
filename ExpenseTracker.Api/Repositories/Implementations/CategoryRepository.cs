@@ -9,7 +9,7 @@ public class CategoryRepository(
     ApplicationDbContext context
 ) : ICategoryRepository
 {
-    public async Task<Category> CreateAsync(Category category)
+    public async Task<Category> CreateCategoryAsync(Category category)
     {
         await context.Categories.AddAsync(category);
         await context.SaveChangesAsync();
@@ -17,7 +17,7 @@ public class CategoryRepository(
         return category;
     }
 
-    public async Task<IReadOnlyList<Category>> GetAllAsync(string userId, Guid? walletId = null)
+    public async Task<IReadOnlyList<Category>> GetCategoriesAsync(string userId, Guid? walletId = null)
     {
         var query = context.Categories
             .AsNoTracking()
@@ -32,20 +32,20 @@ public class CategoryRepository(
             .ToListAsync();
     }
 
-    public async Task<Category?> GetAsync(string userId, Guid categoryId)
+    public async Task<Category?> GetCategoryAsync(string userId, Guid categoryId)
     {
         return await context.Categories
             .Include(c => c.Wallet)
             .FirstOrDefaultAsync(c => c.Id == categoryId && c.Wallet.UserId == userId);
     }
 
-    public async Task UpdateAsync(Category category)
+    public async Task UpdateCategoryAsync(Category category)
     {
         context.Categories.Update(category);
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Category category)
+    public async Task DeleteCategoryAsync(Category category)
     {
         context.Categories.Remove(category);
         await context.SaveChangesAsync();

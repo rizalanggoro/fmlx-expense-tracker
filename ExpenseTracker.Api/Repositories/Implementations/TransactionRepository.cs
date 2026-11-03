@@ -8,7 +8,7 @@ namespace ExpenseTracker.Api.Repositories.Implementations;
 
 public class TransactionRepository(ApplicationDbContext context) : ITransactionRepository
 {
-    public async Task<Transaction> CreateAsync(Transaction transaction)
+    public async Task<Transaction> CreateTransactionAsync(Transaction transaction)
     {
         await context.Transactions.AddAsync(transaction);
         await context.SaveChangesAsync();
@@ -16,7 +16,7 @@ public class TransactionRepository(ApplicationDbContext context) : ITransactionR
         return transaction;
     }
 
-    public async Task<PagedResult<Transaction>> GetAllPagedAsync(
+    public async Task<PagedResult<Transaction>> GetPagedTransactionsAsync(
         string userId,
         Guid? categoryId = null,
         int pageIndex = 1,
@@ -48,7 +48,7 @@ public class TransactionRepository(ApplicationDbContext context) : ITransactionR
         return new PagedResult<Transaction>(items, totalCount, pageIndex, pageSize);
     }
 
-    public async Task<Transaction?> GetByIdAsync(string userId, Guid transactionId)
+    public async Task<Transaction?> GetTransactionAsync(string userId, Guid transactionId)
     {
         return await context.Transactions
             .Include(t => t.Category)
@@ -56,13 +56,13 @@ public class TransactionRepository(ApplicationDbContext context) : ITransactionR
     }
 
 
-    public async Task UpdateAsync(Transaction transaction)
+    public async Task UpdateTransactionAsync(Transaction transaction)
     {
         context.Transactions.Update(transaction);
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Transaction transaction)
+    public async Task DeleteTransactionAsync(Transaction transaction)
     {
         context.Transactions.Remove(transaction);
         await context.SaveChangesAsync();

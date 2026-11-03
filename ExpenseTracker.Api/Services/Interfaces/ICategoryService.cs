@@ -5,28 +5,28 @@ namespace ExpenseTracker.Api.Services.Interfaces;
 
 public interface ICategoryService
 {
-    Task<ServiceResult<CategoryResponseDto>> CreateAsync(
+    Task<ServiceResult<CategoryResponseDto>> CreateCategoryAsync(
         string userId,
         CreateCategoryDto request
     );
 
-    Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetAllAsync(
+    Task<ServiceResult<IReadOnlyList<CategoryResponseDto>>> GetCategoriesAsync(
         string userId,
         Guid? walletId = null
     );
 
-    Task<ServiceResult<CategoryResponseDto>> GetAsync(
+    Task<ServiceResult<CategoryResponseDto>> GetCategoryAsync(
         string userId,
         Guid categoryId
     );
 
-    Task<ServiceResult<CategoryResponseDto>> UpdateAsync(
+    Task<ServiceResult<CategoryResponseDto>> UpdateCategoryAsync(
         string userId,
         Guid categoryId,
         UpdateCategoryDto request
     );
 
-    Task<ServiceResult<bool>> DeleteAsync(
+    Task<ServiceResult<bool>> DeleteCategoryAsync(
         string userId,
         Guid categoryId
     );

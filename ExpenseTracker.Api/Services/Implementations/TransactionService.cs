@@ -18,7 +18,7 @@ public class TransactionService(
         CreateTransactionDto request
     )
     {
-        var category = await categoryRepository.GetAsync(userId, request.CategoryId);
+        var category = await categoryRepository.GetCategoryAsync(userId, request.CategoryId);
         if (category == null)
             return ServiceResult<TransactionResponseDto>.Failure(
                 "Category not found.",
@@ -29,7 +29,7 @@ public class TransactionService(
         transaction.Id = Guid.NewGuid();
         transaction.CreatedAtUtc = DateTime.UtcNow;
 
-        await transactionRepository.CreateAsync(transaction);
+        await transactionRepository.CreateTransactionAsync(transaction);
 
         // Assign navigation category for mapper response
         transaction.Category = category;
@@ -54,7 +54,7 @@ public class TransactionService(
     {
         if (categoryId.HasValue)
         {
-            var category = await categoryRepository.GetAsync(userId, categoryId.Value);
+            var category = await categoryRepository.GetCategoryAsync(userId, categoryId.Value);
             if (category == null)
                 return ServiceResult<PagedResult<TransactionResponseDto>>.Failure(
                     "Category not found.",
@@ -62,7 +62,7 @@ public class TransactionService(
                 );
         }
 
-        var pagedTransactions = await transactionRepository.GetAllPagedAsync(
+        var pagedTransactions = await transactionRepository.GetPagedTransactionsAsync(
             userId,
             categoryId,
             pageIndex,
@@ -82,12 +82,12 @@ public class TransactionService(
         return ServiceResult<PagedResult<TransactionResponseDto>>.Success(pagedResult);
     }
 
-    public async Task<ServiceResult<TransactionResponseDto>> GetTransactionByIdAsync(
+    public async Task<ServiceResult<TransactionResponseDto>> GetTransactionAsync(
         string userId,
         Guid transactionId
     )
     {
-        var transaction = await transactionRepository.GetByIdAsync(userId, transactionId);
+        var transaction = await transactionRepository.GetTransactionAsync(userId, transactionId);
         if (transaction == null)
             return ServiceResult<TransactionResponseDto>.Failure(
                 "Transaction not found.",
@@ -105,7 +105,7 @@ public class TransactionService(
         UpdateTransactionDto request
     )
     {
-        var transaction = await transactionRepository.GetByIdAsync(userId, transactionId);
+        var transaction = await transactionRepository.GetTransactionAsync(userId, transactionId);
         if (transaction == null)
             return ServiceResult<TransactionResponseDto>.Failure(
                 "Transaction not found.",
@@ -115,7 +115,7 @@ public class TransactionService(
         mapper.Map(request, transaction);
         transaction.UpdatedAtUtc = DateTime.UtcNow;
 
-        await transactionRepository.UpdateAsync(transaction);
+        await transactionRepository.UpdateTransactionAsync(transaction);
 
         var response = mapper.Map<TransactionResponseDto>(transaction);
 
@@ -127,14 +127,14 @@ public class TransactionService(
 
     public async Task<ServiceResult<bool>> DeleteTransactionAsync(string userId, Guid transactionId)
     {
-        var transaction = await transactionRepository.GetByIdAsync(userId, transactionId);
+        var transaction = await transactionRepository.GetTransactionAsync(userId, transactionId);
         if (transaction == null)
             return ServiceResult<bool>.Failure(
                 "Transaction not found.",
                 404
             );
 
-        await transactionRepository.DeleteAsync(transaction);
+        await transactionRepository.DeleteTransactionAsync(transaction);
 
         return ServiceResult<bool>.Success(
             true,

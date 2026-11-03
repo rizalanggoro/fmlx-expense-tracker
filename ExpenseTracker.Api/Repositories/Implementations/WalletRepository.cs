@@ -9,7 +9,7 @@ public class WalletRepository(
     ApplicationDbContext context
 ) : IWalletRepository
 {
-    public async Task<Wallet> CreateAsync(Wallet wallet)
+    public async Task<Wallet> CreateWalletAsync(Wallet wallet)
     {
         await context.Wallets.AddAsync(wallet);
         await context.SaveChangesAsync();
@@ -17,7 +17,7 @@ public class WalletRepository(
         return wallet;
     }
 
-    public async Task<IReadOnlyList<Wallet>> GetAllAsync(string userId)
+    public async Task<IReadOnlyList<Wallet>> GetWalletsAsync(string userId)
     {
         return await context.Wallets
             .AsNoTracking()
@@ -28,13 +28,13 @@ public class WalletRepository(
             .ToListAsync();
     }
 
-    public async Task<Wallet?> GetAsync(string userId, Guid walletId)
+    public async Task<Wallet?> GetWalletAsync(string userId, Guid walletId)
     {
         return await context.Wallets
             .FirstOrDefaultAsync(w => w.Id == walletId && w.UserId == userId);
     }
 
-    public async Task<Wallet?> GetWithDetailsAsync(string userId, Guid walletId)
+    public async Task<Wallet?> GetWalletWithDetailsAsync(string userId, Guid walletId)
     {
         return await context.Wallets
             .AsNoTracking()
@@ -43,13 +43,13 @@ public class WalletRepository(
             .FirstOrDefaultAsync(w => w.Id == walletId && w.UserId == userId);
     }
 
-    public async Task UpdateAsync(Wallet wallet)
+    public async Task UpdateWalletAsync(Wallet wallet)
     {
         context.Wallets.Update(wallet);
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Wallet wallet)
+    public async Task DeleteWalletAsync(Wallet wallet)
     {
         context.Wallets.Remove(wallet);
         await context.SaveChangesAsync();

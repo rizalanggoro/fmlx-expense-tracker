@@ -105,7 +105,7 @@ public class TransactionsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await transactionService.GetTransactionByIdAsync(userId, id);
+        var result = await transactionService.GetTransactionAsync(userId, id);
         if (!result.IsSuccess)
             return StatusCode(
                 result.StatusCode,

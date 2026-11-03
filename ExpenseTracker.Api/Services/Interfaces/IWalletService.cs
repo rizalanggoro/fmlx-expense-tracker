@@ -5,27 +5,27 @@ namespace ExpenseTracker.Api.Services.Interfaces;
 
 public interface IWalletService
 {
-    Task<ServiceResult<WalletResponseDto>> CreateAsync(
+    Task<ServiceResult<WalletResponseDto>> CreateWalletAsync(
         string userId,
         CreateWalletDto request
     );
 
-    Task<ServiceResult<IReadOnlyList<WalletResponseDto>>> GetAllAsync(
+    Task<ServiceResult<IReadOnlyList<WalletResponseDto>>> GetWalletsAsync(
         string userId
     );
 
-    Task<ServiceResult<WalletDetailResponseDto>> GetAsync(
+    Task<ServiceResult<WalletDetailResponseDto>> GetWalletAsync(
         string userId,
         Guid walletId
     );
 
-    Task<ServiceResult<WalletResponseDto>> UpdateAsync(
+    Task<ServiceResult<WalletResponseDto>> UpdateWalletAsync(
         string userId,
         Guid walletId,
         UpdateWalletDto request
     );
 
-    Task<ServiceResult<bool>> DeleteAsync(
+    Task<ServiceResult<bool>> DeleteWalletAsync(
         string userId,
         Guid walletId
     );
