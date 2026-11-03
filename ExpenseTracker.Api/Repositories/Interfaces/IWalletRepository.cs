@@ -4,10 +4,10 @@ namespace ExpenseTracker.Api.Repositories.Interfaces;
 
 public interface IWalletRepository
 {
-    Task<IReadOnlyList<Wallet>> GetWalletsByUserIdAsync(string userId);
-    Task<Wallet?> GetWalletWithDetailsAsync(Guid walletId, string userId);
-    Task<bool> ExistsAsync(Guid walletId, string userId);
-    Task<Wallet> AddAsync(Wallet wallet);
+    Task<Wallet> CreateAsync(Wallet wallet);
+    Task<IReadOnlyList<Wallet>> GetAllAsync(string userId);
+    Task<Wallet?> GetAsync(string userId, Guid walletId);
+    Task<Wallet?> GetWithDetailsAsync(string userId, Guid walletId);
     Task UpdateAsync(Wallet wallet);
     Task DeleteAsync(Wallet wallet);
 }

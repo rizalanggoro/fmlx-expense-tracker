@@ -15,8 +15,8 @@ public class CategoryService(
 {
     public async Task<ServiceResult<CategoryResponseDto>> CreateCategoryAsync(string userId, CreateCategoryDto request)
     {
-        var walletExists = await walletRepository.ExistsAsync(request.WalletId, userId);
-        if (!walletExists)
+        var wallet = await walletRepository.GetAsync(userId, request.WalletId);
+        if (wallet == null)
             return ServiceResult<CategoryResponseDto>.Failure(
                 "Wallet not found.",
                 404
@@ -41,8 +41,8 @@ public class CategoryService(
     {
         if (walletId.HasValue)
         {
-            var walletExists = await walletRepository.ExistsAsync(walletId.Value, userId);
-            if (!walletExists)
+            var wallet = await walletRepository.GetAsync(userId, walletId.Value);
+            if (wallet == null)
                 return ServiceResult<IReadOnlyList<CategoryResponseDto>>.Failure(
                     "Wallet not found.",
                     404

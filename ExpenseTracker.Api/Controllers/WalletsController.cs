@@ -30,20 +30,33 @@ public class WalletsController(
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return BadRequest(new ErrorResponse("Validation failed", errors));
+            return BadRequest(
+                new ErrorResponse(
+                    "Validation failed",
+                    errors
+                )
+            );
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.CreateWalletAsync(userId, request);
+        var result = await walletService.CreateAsync(userId, request);
         if (!result.IsSuccess)
-        {
-            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to create wallet", result.Errors));
-        }
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to create wallet",
+                    result.Errors
+                )
+            );
 
-        return CreatedAtAction(nameof(GetWalletById), new { id = result.Data!.Id }, result.Data);
+        return CreatedAtAction(
+            nameof(GetWalletById),
+            new { id = result.Data!.Id },
+            result.Data
+        );
     }
 
     [HttpGet]
@@ -55,11 +68,15 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.GetWalletsAsync(userId);
+        var result = await walletService.GetAllAsync(userId);
         if (!result.IsSuccess)
-        {
-            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to retrieve wallets", result.Errors));
-        }
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to retrieve wallets",
+                    result.Errors
+                )
+            );
 
         return Ok(result.Data);
     }
@@ -74,11 +91,15 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.GetWalletByIdAsync(id, userId);
+        var result = await walletService.GetAsync(userId, id);
         if (!result.IsSuccess)
-        {
-            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Wallet not found", result.Errors));
-        }
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Wallet not found",
+                    result.Errors
+                )
+            );
 
         return Ok(result.Data);
     }
@@ -97,18 +118,27 @@ public class WalletsController(
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return BadRequest(new ErrorResponse("Validation failed", errors));
+            return BadRequest(
+                new ErrorResponse(
+                    "Validation failed",
+                    errors
+                )
+            );
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.UpdateWalletAsync(id, userId, request);
+        var result = await walletService.UpdateAsync(userId, id, request);
         if (!result.IsSuccess)
-        {
-            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to update wallet", result.Errors));
-        }
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to update wallet",
+                    result.Errors
+                )
+            );
 
         return Ok(result.Data);
     }
@@ -123,11 +153,15 @@ public class WalletsController(
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await walletService.DeleteWalletAsync(id, userId);
+        var result = await walletService.DeleteAsync(userId, id);
         if (!result.IsSuccess)
-        {
-            return StatusCode(result.StatusCode, new ErrorResponse(result.Message ?? "Failed to delete wallet", result.Errors));
-        }
+            return StatusCode(
+                result.StatusCode,
+                new ErrorResponse(
+                    result.Message ?? "Failed to delete wallet",
+                    result.Errors
+                )
+            );
 
         return NoContent();
     }

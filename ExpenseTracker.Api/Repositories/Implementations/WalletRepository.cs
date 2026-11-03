@@ -5,9 +5,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Repositories.Implementations;
 
-public class WalletRepository(ApplicationDbContext context) : IWalletRepository
+public class WalletRepository(
+    ApplicationDbContext context
+) : IWalletRepository
 {
-    public async Task<IReadOnlyList<Wallet>> GetWalletsByUserIdAsync(string userId)
+    public async Task<Wallet> CreateAsync(Wallet wallet)
+    {
+        await context.Wallets.AddAsync(wallet);
+        await context.SaveChangesAsync();
+
+        return wallet;
+    }
+
+    public async Task<IReadOnlyList<Wallet>> GetAllAsync(string userId)
     {
         return await context.Wallets
             .AsNoTracking()
@@ -18,27 +28,19 @@ public class WalletRepository(ApplicationDbContext context) : IWalletRepository
             .ToListAsync();
     }
 
-    public async Task<Wallet?> GetWalletWithDetailsAsync(Guid walletId, string userId)
+    public async Task<Wallet?> GetAsync(string userId, Guid walletId)
+    {
+        return await context.Wallets
+            .FirstOrDefaultAsync(w => w.Id == walletId && w.UserId == userId);
+    }
+
+    public async Task<Wallet?> GetWithDetailsAsync(string userId, Guid walletId)
     {
         return await context.Wallets
             .AsNoTracking()
             .Include(w => w.Categories)
             .ThenInclude(c => c.Transactions)
             .FirstOrDefaultAsync(w => w.Id == walletId && w.UserId == userId);
-    }
-
-    public async Task<bool> ExistsAsync(Guid walletId, string userId)
-    {
-        return await context.Wallets
-            .AsNoTracking()
-            .AnyAsync(w => w.Id == walletId && w.UserId == userId);
-    }
-
-    public async Task<Wallet> AddAsync(Wallet wallet)
-    {
-        await context.Wallets.AddAsync(wallet);
-        await context.SaveChangesAsync();
-        return wallet;
     }
 
     public async Task UpdateAsync(Wallet wallet)
