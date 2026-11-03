@@ -1,6 +1,5 @@
 using AutoMapper;
 using ExpenseTracker.Api.Domain.Entities;
-using ExpenseTracker.Api.Domain.Enums;
 using ExpenseTracker.Api.DTOs.Transactions;
 
 namespace ExpenseTracker.Api.Mappings;
@@ -23,7 +22,7 @@ public class TransactionMappingProfile : Profile
             .ForMember(dest => dest.UpdatedAtUtc, opt => opt.Ignore());
 
         CreateMap<Transaction, TransactionResponseDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
-            .ForMember(dest => dest.CategoryType, opt => opt.MapFrom(src => src.Category != null ? src.Category.Type : (CategoryType)0));
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+            .ForMember(dest => dest.CategoryType, opt => opt.MapFrom(src => src.Category.Type));
     }
 }
