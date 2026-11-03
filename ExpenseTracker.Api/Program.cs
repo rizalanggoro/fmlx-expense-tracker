@@ -24,7 +24,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 // Load environment variables from .env file
-DotEnv.Load(new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
+DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -149,7 +149,8 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter your JWT token directly (without the 'Bearer ' prefix). Swagger UI will automatically prepend 'Bearer '."
+        Description =
+            "Enter your JWT token directly (without the 'Bearer ' prefix). Swagger UI will automatically prepend 'Bearer '."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
